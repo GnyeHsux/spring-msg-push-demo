@@ -13,6 +13,9 @@ import javax.annotation.Resource;
 @EnableScheduling
 public class SaticScheduleTask {
 
+    /**
+     * 使用Nginx反向代理时，需要设置定时发送心跳消息，不然连接会断开
+     */
     @Scheduled(fixedRate = 58 * 1000)
     private void configureTasks() {
         WebsocketServer.setHearBeatMsg();
