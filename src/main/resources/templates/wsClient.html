@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket Demo</title>
+</head>
+<style>
+    .websocket {
+        width: 800px;
+        height: 600px;
+        border: 1px solid #ccc;
+        margin: 100px auto 0 auto;
+        text-align: center;
+    }
+
+    .onLineUser {
+        height: 600px;
+        text-align: left;
+        float: right;
+        padding-right: 100px;
+    }
+
+    .receive {
+    }
+
+    #receive-box {
+        width: 300px;
+        height: 200px;
+        overflow: auto;
+        margin: 0 auto 24px auto;
+        border: 1px black solid;
+        border-radius: 10px;
+    }
+
+    #msg-need-send {
+        width: 300px;
+        height: 100px;
+        resize: none;
+        border-radius: 10px;
+    }
+
+    #send-btn {
+        border: none;
+        border-radius: 5px;
+        background: #25d1ff;
+        padding: 5px 10px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    #exit {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+</style>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<script>
+
+    window.onload = function () {
+        setInterval(getOnlineUser, 3000)
+    }
+
+
+    function getOnlineUser() {
+        $.ajax({
+            type: "GET",
+            // url: "http://127.0.0.1:8081/getOnlineUser",
+            url: "http://47.106.122.141:8080/getOnlineUser",
+            data: {},
+            dataType: "JSON",
+            success: function (result) {
+                $("#olUser").empty();
+                for (index in result) {
+                    if (result[index] != $("#userId").val()) {
+                        $("#olUser").append(`<li>${result[index]}</li>`)
+                    }
+                }
+            }
+        });
+    }
+
+    function openSocket() {
+        // var socketUrl = "ws://127.0.0.1:8081/wsServer/" + $("#userId").val();
+        var socketUrl = "ws://47.106.122.141:8080/wsServer/" + $("#userId").val();
+        // 创建一个webSocket对象
+        const ws = new WebSocket(socketUrl)
+        ws.onopen = e => {
+            // 连接后监听
+            console.log(`WebSocket 连接状态： ${ws.readyState}`)
+            if (1 == ws.readyState) {
+                $('#openSocket').attr("disabled", true);
+            }
+        }
+
+        ws.onmessage = data => {
+            // 当服务端返回数据的时候，放到页面里
+            var result = eval("(" + data.data + ")");
+            var rstcode = result.rstcode;
+            const receiveBox = document.getElementById("receive-box")
+            if ('0' == rstcode) {
+                receiveBox.innerHTML += `<p style="color: red">${result.fromUserId + ": " + result.msg}</p>`
+            } else if ("2" == rstcode) {
+                receiveBox.innerHTML += `<p style="color: blue">${"离线消息【" + result.sendTime + "】：" + result.fromUserId + ": " + result.msg}</p>`
+            } else if ("1" == rstcode){
+                receiveBox.innerHTML += `<p>${result.fromUserId + ": " + result.msg}</p>`
+            }
+            receiveBox.scrollTo({
+                top: receiveBox.scrollHeight,
+                behavior: "smooth"
+            })
+        }
+        //发生了错误事件
+        ws.onerror = function () {
+            console.log("websocket发生了错误");
+        }
+        ws.onclose = data => {
+            // 监听连接关闭
+            console.log("WebSocket连接已关闭")
+            console.log(data);
+            $('#openSocket').attr("disabled", false);
+            const receiveBox = document.getElementById("receive-box")
+            receiveBox.innerHTML += `<p>你离线了</p>`
+            receiveBox.scrollTo({
+                top: receiveBox.scrollHeight,
+                behavior: "smooth"
+            })
+        }
+
+        $(".send").off('click', '#send-btn').on('click', '#send-btn', function () {
+            if ($.trim($('#toUserId').val()).length > 0) {
+                // 点击发送按钮。将数据发送给服务端
+                ws.send('{"toUserId":"' + $("#toUserId").val() + '","msg":"' + $("#msg-need-send").val() + '"}')
+                const receiveBox = document.getElementById("receive-box")
+                receiveBox.innerHTML += `<p>${$("#userId").val() + ": " + $("#msg-need-send").val()}</p>`
+                receiveBox.scrollTo({
+                    top: receiveBox.scrollHeight,
+                    behavior: "smooth"
+                })
+                $("#msg-need-send").val('');
+            }
+        })
+
+        $(".websocket").off('click', '#exit').on('click', '#exit', function () {
+            // 客户端主动关闭连接
+            ws.close()
+        })
+    }
+</script>
+<body>
+<div class="websocket">
+    <div class="onLineUser">
+        <p>在线用户：</p>
+        <ol id="olUser">
+        </ol>
+    </div>
+    <div>
+        <p>【我是】： <input id="userId" name="userId" type="text" value="">
+        <p>【发送给】： <input id="toUserId" name="toUserId" type="text" value="潮阳彦祖">
+        <p>【操作】：
+            <button id="openSocket" onclick="openSocket()">开启socket通讯</button>
+    </div>
+    <div class="receive">
+        <p>服务端返回的消息</p>
+        <div id="receive-box"></div>
+    </div>
+    <div class="send">
+        <textarea type="text" id="msg-need-send"></textarea>
+        <p>
+            <button id="send-btn">点击发消息给服务端</button>
+        </p>
+    </div>
+    <button id="exit">关闭连接</button>
+</div>
+</body>
+</html>

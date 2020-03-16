@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dwr Demo</title>
+    <script type='text/javascript' src='/dwr/engine.js'></script>
+    <script type='text/javascript' src='/dwr/interface/DwrService.js'></script>
+</head>
+<body>
+hello
+<input type="text" id="key" value="123"/>
+<button onclick="onOpen()">注册通讯</button>
+<script>
+    /*DwrService.echo('叫我小司马', function (str) {
+        alert(str);
+    });
+    DwrService.hello(function (str) {
+        alert(str);
+    })*/
+
+    // 后端会调用这个函数
+    function getmessage(data){
+        console.info(data);
+    }
+    function onOpen() {
+        var key = document.getElementById("key").value;
+        console.info(key);
+        DwrService.onPageLoad(key);
+    }
+</script>
+</body>
+</html>
