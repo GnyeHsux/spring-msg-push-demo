@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.shiji</groupId>
 	<artifactId>spring-msg-push-demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>spring-msg-push-demo</name>
 	<description>Msg-Push Demo project for Spring Boot</description>
 

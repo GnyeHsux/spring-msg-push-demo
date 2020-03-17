@@ -63,7 +63,9 @@
         setInterval(getOnlineUser, 3000)
     }
 
-    var ip = [[${ip}]];
+    // var ip = [[${ip}]];
+    var ip = "localhost";
+    // var ip = "172.17.13.72";
 
     function getOnlineUser() {
         $.ajax({
@@ -108,6 +110,8 @@
                 receiveBox.innerHTML += `<p style="color: blue">${"离线消息【" + result.sendTime + "】：" + result.fromUserId + ": " + result.msg}</p>`
             } else if ("1" == rstcode){
                 receiveBox.innerHTML += `<p>${result.fromUserId + ": " + result.msg}</p>`
+            } else if ("4" == rstcode) {
+                receiveBox.innerHTML += `<p style="color: blue">${"系统消息【" + result.sendTime + "】：" + result.msg}</p>`
             }
             receiveBox.scrollTo({
                 top: receiveBox.scrollHeight,

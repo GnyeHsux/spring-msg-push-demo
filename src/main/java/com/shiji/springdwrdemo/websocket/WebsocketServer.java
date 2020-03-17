@@ -135,7 +135,7 @@ public class WebsocketServer {
     /**
      * 实现服务器主动推送
      */
-    public void sendMessage(String message) throws IOException {
+    public synchronized void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
     }
 
@@ -154,11 +154,11 @@ public class WebsocketServer {
      * 发送自定义消息
      */
     public static void sendInfo(String message, @PathParam("userId") String userId) throws IOException {
-        log.info("发送消息到:" + userId + "，报文:" + message);
         if (!StringUtils.isEmpty(userId) && webSocketMap.containsKey(userId)) {
-            webSocketMap.get(userId).sendMessage(message);
+            log.info("发送消息到: " + userId + "，报文: " + message);
+            webSocketMap.get(userId).sendMessage(getRstStr("4", "服务器", message, webSocketMap.get(userId).getNowTimeStr()));
         } else {
-            log.error("用户" + userId + ",不在线！");
+            log.error("用户: " + userId + ",不在线！");
         }
     }
 
@@ -228,11 +228,39 @@ public class WebsocketServer {
         return dateTime.format(formatter);
     }
 
+    /**
+     * 获取当前时间字符串
+     * @return
+     */
     private String getNowTimeStr() {
         return formatDate(LocalDateTime.now());
     }
 
+    /**
+     * 获取在线用户
+     * @return
+     */
     public static List<String> getOnLineUserList() {
         return onLineUserList;
+    }
+
+    /**
+     * T用户
+     * @param userId
+     */
+    public static boolean closeUser(String userId) {
+        try {
+            WebsocketServer ws = webSocketMap.get(userId);
+            if (ws == null) {
+                log.warn("用户未连接！userID: " + userId);
+                return false;
+            }
+            CloseReason reason = new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "管理员强制下线用户");
+            ws.session.close(reason);
+            return true;
+        } catch (IOException e) {
+            log.error("强制下线用户异常！！！", e);
+        }
+        return false;
     }
 }
