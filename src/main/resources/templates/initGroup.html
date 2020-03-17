@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>创建群组</title>
+</head>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<body>
+<div>
+    <input type="text" id="groupName" value="凉瓜铺"/>
+    <button onclick="createGroup()">创建群</button>
+</div>
+<div>
+    <ol id="groupOl">
+    </ol>
+</div>
+</body>
+<script>
+    var ip = "localhost";
+
+    function createGroup() {
+        $.ajax({
+            type: "POST",
+            url: "http://" + ip + ":8081/group/createGroup",
+            // url: "http://47.106.122.141:8080/createGroup",
+            data: {
+                "groupName": $("#groupName").val()
+            },
+            dataType: "JSON",
+            success: function (result) {
+                getGroups();
+            }
+        });
+    }
+
+    window.onload = function () {
+        setInterval(getGroups, 3000)
+    }
+
+    function getGroups() {
+        $.ajax({
+            type: "GET",
+            url: "http://" + ip + ":8081/group/getGroups",
+            // url: "http://47.106.122.141:8080/getGroups",
+            data: {},
+            dataType: "JSON",
+            success: function (result) {
+                $("#groupOl").empty();
+                for (index in result) {
+                    $("#groupOl").append(`<li>${result[index]}</li>`)
+                }
+            }
+        });
+    }
+</script>
+</html>

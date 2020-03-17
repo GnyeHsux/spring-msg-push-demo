@@ -39,7 +39,7 @@
         border-radius: 10px;
     }
 
-    #send-btn {
+    .sendBtn {
         border: none;
         border-radius: 5px;
         background: #25d1ff;
@@ -65,6 +65,7 @@
 
     // var ip = [[${ip}]];
     var ip = "localhost";
+    var test = [[${#httpServletRequest.getContextPath()}]];
     // var ip = "172.17.13.72";
 
     function getOnlineUser() {
@@ -97,61 +98,67 @@
             if (1 == ws.readyState) {
                 $('#openSocket').attr("disabled", true);
             }
-        }
+        };
 
         ws.onmessage = data => {
             // 当服务端返回数据的时候，放到页面里
             var result = eval("(" + data.data + ")");
             var rstcode = result.rstcode;
-            const receiveBox = document.getElementById("receive-box")
+            var msg = '';
             if ('0' == rstcode) {
-                receiveBox.innerHTML += `<p style="color: red">${result.fromUserId + ": " + result.msg}</p>`
+                msg = `<p style="color: red">${result.fromUserId + ": " + result.msg}</p>`
             } else if ("2" == rstcode) {
-                receiveBox.innerHTML += `<p style="color: blue">${"离线消息【" + result.sendTime + "】：" + result.fromUserId + ": " + result.msg}</p>`
+                msg = `<p style="color: blue">${"离线消息【" + result.sendTime + "】：" + result.fromUserId + ": " + result.msg}</p>`
             } else if ("1" == rstcode){
-                receiveBox.innerHTML += `<p>${result.fromUserId + ": " + result.msg}</p>`
+                msg = `<p>${result.fromUserId + ": " + result.msg}</p>`
             } else if ("4" == rstcode) {
-                receiveBox.innerHTML += `<p style="color: blue">${"系统消息【" + result.sendTime + "】：" + result.msg}</p>`
+                msg = `<p style="color: blue">${"系统消息【" + result.sendTime + "】：" + result.msg}</p>`
             }
-            receiveBox.scrollTo({
-                top: receiveBox.scrollHeight,
-                behavior: "smooth"
-            })
-        }
+            showMsg(msg);
+        };
         //发生了错误事件
         ws.onerror = function () {
             console.log("websocket发生了错误");
-        }
+            showMsg(`<p style="color: red">通讯出错！！！</p>`)
+        };
         ws.onclose = data => {
             // 监听连接关闭
             console.log("WebSocket连接已关闭")
-            console.log(data);
+            console.warn(data.reason);
             $('#openSocket').attr("disabled", false);
-            const receiveBox = document.getElementById("receive-box")
-            receiveBox.innerHTML += `<p>你离线了</p>`
-            receiveBox.scrollTo({
-                top: receiveBox.scrollHeight,
-                behavior: "smooth"
-            })
-        }
+            showMsg(`<p style="color: red">你离线了</p>`)
+        };
 
         $(".send").off('click', '#send-btn').on('click', '#send-btn', function () {
             if ($.trim($('#toUserId').val()).length > 0) {
                 // 点击发送按钮。将数据发送给服务端
                 ws.send('{"toUserId":"' + $("#toUserId").val() + '","msg":"' + $("#msg-need-send").val() + '"}')
-                const receiveBox = document.getElementById("receive-box")
-                receiveBox.innerHTML += `<p>${$("#userId").val() + ": " + $("#msg-need-send").val()}</p>`
-                receiveBox.scrollTo({
-                    top: receiveBox.scrollHeight,
-                    behavior: "smooth"
-                })
+                showMsg(`<p>${$("#userId").val() + ": " + $("#msg-need-send").val()}</p>`)
                 $("#msg-need-send").val('');
             }
-        })
+        });
+
+        $(".send").off('click', '#send-group-btn').on('click', '#send-group-btn', function () {
+            if ($.trim($('#toUserId').val()).length > 0) {
+                // 点击发送按钮。将数据发送给服务端
+                ws.send('{"toGroupId":"' + $("#toGroupId").val() + '","msg":"' + $("#msg-need-send").val() + '"}')
+                showMsg(`<p>${$("#userId").val() + ": " + $("#msg-need-send").val()}</p>`)
+                $("#msg-need-send").val('');
+            }
+        });
 
         $(".websocket").off('click', '#exit').on('click', '#exit', function () {
             // 客户端主动关闭连接
             ws.close()
+        });
+    }
+
+    function showMsg(data) {
+        var receiveBox = document.getElementById("receive-box")
+        receiveBox.innerHTML += `${data}`
+        receiveBox.scrollTo({
+            top: receiveBox.scrollHeight,
+            behavior: "smooth"
         })
     }
 </script>
@@ -165,6 +172,7 @@
     <div>
         <p>【我是】： <input id="userId" name="userId" type="text" value="收银员">
         <p>【发送给】： <input id="toUserId" name="toUserId" type="text" value="主管">
+        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="凉瓜铺">
         <p>【操作】：
             <button id="openSocket" onclick="openSocket()">开启socket通讯</button>
     </div>
@@ -175,7 +183,8 @@
     <div class="send">
         <textarea type="text" id="msg-need-send"></textarea>
         <p>
-            <button id="send-btn">点击发消息给服务端</button>
+            <button class="sendBtn" id="send-btn">发个人消息</button>
+            <button class="sendBtn" id="send-group-btn">发群消息</button>
         </p>
     </div>
     <button id="exit">关闭连接</button>

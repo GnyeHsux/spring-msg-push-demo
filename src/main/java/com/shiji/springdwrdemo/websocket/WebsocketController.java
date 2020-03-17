@@ -2,10 +2,7 @@ package com.shiji.springdwrdemo.websocket;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.websocket.server.PathParam;
@@ -28,6 +25,11 @@ public class WebsocketController {
         mv.setViewName("wsClient");
         mv.addObject("ip", ip);
         return mv;
+    }
+
+    @GetMapping("/group")
+    public String group() {
+        return "initGroup";
     }
 
     /**
@@ -86,8 +88,22 @@ public class WebsocketController {
      * @throws IOException
      */
     @RequestMapping("/push/{toUserId}")
+    @ResponseBody
     public ResponseEntity<String> pushToWeb(String message, @PathVariable String toUserId) throws IOException {
         WebsocketServer.sendInfo(message, toUserId);
         return ResponseEntity.ok("MSG SEND SUCCESS");
+    }
+
+    @PostMapping("/group/createGroup")
+    @ResponseBody
+    public ResponseEntity<String> createGroup(@RequestParam String groupName) {
+        WebsocketServer.createGroup(groupName);
+        return ResponseEntity.ok("SUCCESS");
+    }
+
+    @GetMapping("/group/getGroups")
+    @ResponseBody
+    public ResponseEntity<List<String>> getGroup() {
+        return ResponseEntity.ok(WebsocketServer.getGroupList());
     }
 }

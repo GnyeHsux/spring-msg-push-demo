@@ -43,6 +43,39 @@ public class WebsocketServer {
     private String userId = "";
 
     /**
+     * 群组
+     */
+    private static Map<String, List<String>> groupMap = new ConcurrentHashMap<>();
+
+    public static void createGroup(String groupName) {
+        List<String> group = groupMap.get(groupName);
+        if (CollectionUtils.isEmpty(group)) {
+            groupMap.put(groupName, new ArrayList<>());
+        }
+    }
+
+    public static List<String> getGroupList() {
+        List<String> groups = new ArrayList<>();
+        groupMap.forEach((key, value) -> {
+            groups.add(key);
+        });
+        return groups;
+    }
+
+    public void joinGroup(String groupName) {
+        List<String> group = groupMap.get(groupName);
+        if (group == null) {
+            log.error("{}群不存在!!!", groupName);
+            return;
+        }
+        if (group.contains(this.userId)) {
+            log.warn("你已加入该群，被再加了！");
+            return;
+        }
+        group.add(this.userId);
+    }
+
+    /**
      * 连接建立成功调用的方法
      */
     @OnOpen
@@ -107,14 +140,20 @@ public class WebsocketServer {
                 //追加发送人(防止串改)
                 jsonObject.put("fromUserId", this.userId);
                 String toUserId = jsonObject.getString("toUserId");
-                //传送给对应toUserId用户的websocket
-                if (!StringUtils.isEmpty(toUserId) && webSocketMap.containsKey(toUserId)) {
-                    webSocketMap.get(toUserId).sendMessage(getRstStr("1", this.userId, jsonObject.getString("msg"), getNowTimeStr()));
+                String toGroupId = jsonObject.getString("toGroupId");
+                if (org.apache.commons.lang3.StringUtils.isNotBlank(toGroupId)) {
+                    joinGroup(toGroupId);
+                    sendGroupMsg(toGroupId, jsonObject.getString("msg"));
                 } else {
-                    log.error("请求的userId:" + toUserId + "不在该服务器上");
-                    webSocketMap.get(userId).sendMessage(getRstStr("0", "服务器", toUserId + "不在线", getNowTimeStr()));
-                    saveNotOnLineMsg(toUserId, this.userId, jsonObject.getString("msg"), formatDate(LocalDateTime.now()));
-                    //否则不在这个服务器上，发送到mysql或者redis
+                    //传送给对应toUserId用户的websocket
+                    if (!StringUtils.isEmpty(toUserId) && webSocketMap.containsKey(toUserId)) {
+                        webSocketMap.get(toUserId).sendMessage(getRstStr("1", this.userId, jsonObject.getString("msg"), getNowTimeStr()));
+                    } else {
+                        log.error("请求的userId:" + toUserId + "不在该服务器上");
+                        webSocketMap.get(userId).sendMessage(getRstStr("0", "服务器", toUserId + "不在线", getNowTimeStr()));
+                        saveNotOnLineMsg(toUserId, this.userId, jsonObject.getString("msg"), formatDate(LocalDateTime.now()));
+                        //否则不在这个服务器上，发送到mysql或者redis
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -153,7 +192,7 @@ public class WebsocketServer {
     /**
      * 发送自定义消息
      */
-    public static void sendInfo(String message, @PathParam("userId") String userId) throws IOException {
+    public static void sendInfo(String message, String userId) throws IOException {
         if (!StringUtils.isEmpty(userId) && webSocketMap.containsKey(userId)) {
             log.info("发送消息到: " + userId + "，报文: " + message);
             webSocketMap.get(userId).sendMessage(getRstStr("4", "服务器", message, webSocketMap.get(userId).getNowTimeStr()));
@@ -262,5 +301,30 @@ public class WebsocketServer {
             log.error("强制下线用户异常！！！", e);
         }
         return false;
+    }
+
+    /**
+     * 发送群消息
+     * @param groupName
+     * @param msg
+     * @throws IOException
+     */
+    public void sendGroupMsg(String groupName, String msg) throws IOException {
+        List<String> group = groupMap.get(groupName);
+        if (group == null) {
+            log.error("该群[{}]不存在", groupName);
+            return;
+        }
+        if (org.apache.commons.lang3.StringUtils.isBlank(msg)) {
+            log.warn("消息为空！！！不推送");
+            return;
+        }
+        for (String userId : group) {
+            if (userId.equals(this.userId)) {
+                continue;
+            }
+            WebsocketServer ws = webSocketMap.get(userId);
+            ws.sendMessage(getRstStr("1", this.userId, msg, getNowTimeStr()));
+        }
     }
 }
