@@ -87,11 +87,10 @@ public class WebsocketController {
      * @return
      * @throws IOException
      */
-    @RequestMapping("/push/{toUserId}")
+    @PostMapping("/push/{toUserId}")
     @ResponseBody
-    public ResponseEntity<String> pushToWeb(String message, @PathVariable String toUserId) throws IOException {
-        WebsocketServer.sendInfo(message, toUserId);
-        return ResponseEntity.ok("MSG SEND SUCCESS");
+    public ResponseEntity<String> pushToWeb(@RequestParam String message, @PathVariable String toUserId) throws IOException {
+        return ResponseEntity.ok(WebsocketServer.sendInfo(message, toUserId));
     }
 
     @PostMapping("/group/createGroup")

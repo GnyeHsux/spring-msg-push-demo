@@ -191,13 +191,14 @@ public class WebsocketServer {
 
     /**
      * 发送自定义消息
+     * @return
      */
-    public static void sendInfo(String message, String userId) throws IOException {
+    public static String sendInfo(String message, String userId) throws IOException {
         if (!StringUtils.isEmpty(userId) && webSocketMap.containsKey(userId)) {
-            log.info("发送消息到: " + userId + "，报文: " + message);
             webSocketMap.get(userId).sendMessage(getRstStr("4", "服务器", message, webSocketMap.get(userId).getNowTimeStr()));
+            return "发送消息【" + message + "】给: " + userId;
         } else {
-            log.error("用户: " + userId + ",不在线！");
+            return "用户: " + userId + ",不在线！";
         }
     }
 

@@ -64,9 +64,8 @@
     }
 
     // var ip = [[${ip}]];
-    var ip = "localhost";
-    var test = [[${#httpServletRequest.getContextPath()}]];
-    // var ip = "172.17.13.72";
+    // var ip = "localhost";
+    var ip = "172.17.13.72";
 
     function getOnlineUser() {
         $.ajax({
@@ -171,8 +170,8 @@
     </div>
     <div>
         <p>【我是】： <input id="userId" name="userId" type="text" value="收银员">
-        <p>【发送给】： <input id="toUserId" name="toUserId" type="text" value="主管">
-        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="凉瓜铺">
+        <p>【发送给】： <input id="toUserId" name="toUserId" type="text" value="">
+        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="东湖门店组">
         <p>【操作】：
             <button id="openSocket" onclick="openSocket()">开启socket通讯</button>
     </div>
