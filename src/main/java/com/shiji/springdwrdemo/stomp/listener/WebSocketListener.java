@@ -31,16 +31,17 @@ public class WebSocketListener {
 
     @EventListener
     public void handleConnectListener(SessionConnectedEvent sessionConnectedEvent) {
-        log.info("建立连接 -> {}", sessionConnectedEvent);
+        log.debug("建立连接 -> {}", sessionConnectedEvent);
 
         user = (User) sessionConnectedEvent.getUser();
 
         UserCache.addUser(user.getUserId(), user);
+        log.info("用户建立连接：{}", user);
     }
 
     @EventListener
     public void handleDisconnectListener(SessionDisconnectEvent sessionDisconnectEvent) throws Exception {
-        log.info("断开连接 -> {}", sessionDisconnectEvent);
+        log.debug("断开连接 -> {}", sessionDisconnectEvent);
 
         String userId = sessionDisconnectEvent.getUser().getName();
         User user = UserCache.getUser(userId);
@@ -59,7 +60,7 @@ public class WebSocketListener {
 
     @EventListener
     public void handleSubscribeListener(SessionSubscribeEvent sessionSubscribeEvent) throws Exception {
-        log.info("新的订阅 -> {}", sessionSubscribeEvent);
+        log.debug("新的订阅 -> {}", sessionSubscribeEvent);
         StompHeaderAccessor stompHeaderAccessor = MessageHeaderAccessor.getAccessor(sessionSubscribeEvent.getMessage(),
                 StompHeaderAccessor.class);
 

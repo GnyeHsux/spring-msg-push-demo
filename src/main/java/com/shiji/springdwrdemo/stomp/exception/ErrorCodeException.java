@@ -5,8 +5,8 @@ import com.shiji.springdwrdemo.stomp.enums.inter.Code;
 /**
  * 返回错误码
  *
- * @author yanpanyi
- * @date 2019/3/20
+ * @author xsy
+ * @date 2020/3/23
  */
 public class ErrorCodeException extends Exception {
 

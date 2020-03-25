@@ -16,8 +16,8 @@ import java.util.regex.Pattern;
 /**
  * 敏感词处理
  *
- * @author yanpanyi
- * @date 2019/4/4
+ * @author xsy
+ * @date 2020/3/23
  */
 @Slf4j
 @Configuration
@@ -67,12 +67,12 @@ public class SensitiveWordUtils {
         if (keyWords == null) {
             // 读取敏感词库
             readSensitiveWords();
-            log.info("初始化敏感词库，共有{}个敏感词", keyWords.size());
+            log.debug("初始化敏感词库，共有{}个敏感词", keyWords.size());
         }
 
         // 初始化根节点
         rootNode = new SensitiveWordNode(' ');
-        log.info("初始化敏感词节点");
+        log.debug("初始化敏感词节点");
 
         // 创建敏感词
         for (String keyWord : keyWords) {
@@ -111,7 +111,7 @@ public class SensitiveWordUtils {
         }
 
         if (rootNode == null) {
-            log.info("敏感词节点未被初始化！");
+            log.debug("敏感词节点未被初始化！");
             return false;
         }
 
@@ -132,7 +132,7 @@ public class SensitiveWordUtils {
                 sb.append(nowNode.getKey());
 
                 if (nowNode.isEnd()) {
-                    log.info("[{}] => 存在敏感词 -> {}", text, sb.toString());
+                    log.debug("[{}] => 存在敏感词 -> {}", text, sb.toString());
                     return true;
                 }
             }

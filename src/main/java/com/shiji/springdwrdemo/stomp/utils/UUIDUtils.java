@@ -5,8 +5,8 @@ import java.util.UUID;
 /**
  * uuid工具类
  *
- * @author yanpanyi
- * @date 2019/03/27
+ * @author xsy
+ * @date 2020/3/23
  */
 public class UUIDUtils {
 

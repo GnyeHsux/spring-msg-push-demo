@@ -10,8 +10,8 @@ import java.io.Serializable;
 /**
  * 消息请求
  *
- * @author yanpanyi
- * @date 2019/3/20
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

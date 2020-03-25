@@ -8,8 +8,8 @@ import lombok.ToString;
 /**
  * 撤消消息
  *
- * @author yanpanyi
- * @date 2019/3/25
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

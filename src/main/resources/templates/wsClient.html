@@ -61,12 +61,8 @@
     }
 </style>
 <script>
+
     var vConsole = new VConsole();
-    // var ip = [[${ip}]];
-    var ip = "localhost";
-    // var ip = "172.17.13.72";
-
-
 
     var stompClient = null;
     var onlineUserList = [];
@@ -118,7 +114,7 @@
             //订阅聊天室的消息
             stompClient.subscribe('/topic/chatRoom', function (data) {
                 data = JSON.parse(data.body).data;
-                if ($("#userId").val() === data.user.username) {
+                if (uid === data.user.userId) {
                     data.user.username = '我';
                 }
                 var msg = `<p style="color: black">${data.user.username + ": " + data.message}</p>`;
@@ -136,10 +132,10 @@
                 $("#olUser").append(`<li>${onlineUserList[index].username}</li>`)
             }
         }
-        $("#users").empty();
+        $("#toUserId").empty();
         for (index in onlineUserList) {
             if (onlineUserList[index].userId != uid) {
-                $("#users").append(`<option value="${onlineUserList[index].username}">`)
+                $("#toUserId").append(`<option value="${onlineUserList[index].userId}">${onlineUserList[index].username}</option>`)
             }
         }
     }
@@ -150,72 +146,6 @@
             stompClient.disconnect();
         }
         $('#openSocket').attr("disabled", false);
-    }
-
-    function openSocket() {
-        var socketUrl = "ws://" + ip +":8081/wsServer/" + $("#userId").val();
-        // var socketUrl = "ws://47.106.122.141:8080/wsServer/" + $("#userId").val();
-        // 创建一个webSocket对象
-        const ws = new WebSocket(socketUrl)
-        ws.onopen = e => {
-            // 连接后监听
-            console.log(`WebSocket 连接状态： ${ws.readyState}`)
-            if (1 == ws.readyState) {
-                $('#openSocket').attr("disabled", true);
-            }
-        };
-
-        ws.onmessage = data => {
-            // 当服务端返回数据的时候，放到页面里
-            var result = eval("(" + data.data + ")");
-            var rstcode = result.rstcode;
-            var msg = '';
-            if ('0' == rstcode) {
-                msg = `<p style="color: red">${result.fromUserId + ": " + result.msg}</p>`
-            } else if ("2" == rstcode) {
-                msg = `<p style="color: blue">${"离线消息【" + result.sendTime + "】：" + result.fromUserId + ": " + result.msg}</p>`
-            } else if ("1" == rstcode){
-                msg = `<p>${result.fromUserId + ": " + result.msg}</p>`
-            } else if ("4" == rstcode) {
-                msg = `<p style="color: blue">${"系统消息【" + result.sendTime + "】：" + result.msg}</p>`
-            }
-            showMsg(msg);
-        };
-        //发生了错误事件
-        ws.onerror = function () {
-            console.log("websocket发生了错误");
-            showMsg(`<p style="color: red">通讯出错！！！</p>`)
-        };
-        ws.onclose = data => {
-            // 监听连接关闭
-            console.log("WebSocket连接已关闭")
-            console.warn(data.reason);
-            $('#openSocket').attr("disabled", false);
-            showMsg(`<p style="color: red">你离线了</p>`)
-        };
-
-        $(".send").off('click', '#send-btn').on('click', '#send-btn', function () {
-            if ($.trim($('#toUserId').val()).length > 0) {
-                // 点击发送按钮。将数据发送给服务端
-                ws.send('{"toUserId":"' + $("#toUserId").val() + '","msg":"' + $("#msg-need-send").val() + '"}')
-                showMsg(`<p>${$("#userId").val() + ": " + $("#msg-need-send").val()}</p>`)
-                $("#msg-need-send").val('');
-            }
-        });
-
-        $(".send").off('click', '#send-group-btn').on('click', '#send-group-btn', function () {
-            if ($.trim($('#toUserId').val()).length > 0) {
-                // 点击发送按钮。将数据发送给服务端
-                ws.send('{"toGroupId":"' + $("#toGroupId").val() + '","msg":"' + $("#msg-need-send").val() + '"}')
-                showMsg(`<p>${$("#userId").val() + ": " + $("#msg-need-send").val()}</p>`)
-                $("#msg-need-send").val('');
-            }
-        });
-
-        $(".websocket").off('click', '#exit').on('click', '#exit', function () {
-            // 客户端主动关闭连接
-            ws.close()
-        });
     }
 
     function showMsg(data) {
@@ -241,7 +171,7 @@
         var pub = '/app/chatRoom';
         if ('user' === type) {
             pub = '/app/chat';
-            data.receiver = [getUserIdByName($("#toUserId").val())];
+            data.receiver = [$("#toUserId").val()];
         }
 
         data = JSON.stringify(data);
@@ -292,9 +222,7 @@
     </div>
     <div>
         <p>【我是】： <input id="userId" name="userId" type="text" value="收银员">
-        <p>【发送给】： <input list="users" id="toUserId" name="toUserId">
-        <datalist id="users">
-        </datalist>
+        <p>【发送给】： <select style="width: 130px" id="toUserId"></select>
 <!--        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="东湖门店组">-->
         <p>【操作】：<button id="openSocket" onclick="connect()">开启socket通讯</button>
     </div>
@@ -305,8 +233,8 @@
     <div class="send">
         <textarea type="text" id="msg-need-send"></textarea>
         <p>
-            <button class="sendBtn" id="send-btn" onclick="sendMsg('user')">发个人消息</button>
-            <button class="sendBtn" id="send-group-btn" onclick="sendMsg('group')">发群消息</button>
+            <button class="sendBtn" id="send-btn" onclick="sendMsg('user')">推送个人消息</button>
+            <button class="sendBtn" id="send-group-btn" onclick="sendMsg('group')">推送全局消息</button>
         </p>
     </div>
     <button id="exit" onclick="disConnect()">关闭连接</button>

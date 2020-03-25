@@ -6,8 +6,8 @@ import com.shiji.springdwrdemo.stomp.enums.inter.Code;
 /**
  * 响应码枚举
  *
- * @author yanpanyi
- * @date 2019/3/20
+ * @author xsy
+ * @date 2020/3/23
  */
 public enum CodeEnum implements Code {
 

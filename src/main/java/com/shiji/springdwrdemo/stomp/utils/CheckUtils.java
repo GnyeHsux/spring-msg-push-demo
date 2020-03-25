@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 /**
  * 校验相关
  *
- * @author yanpanyi
- * @date 2019/3/25
+ * @author xsy
+ * @date 2020/3/23
  */
 @Component
 public class CheckUtils {

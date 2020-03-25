@@ -10,8 +10,8 @@ import java.security.Principal;
 /**
  * 用户信息
  *
- * @author yanpanyi
- * @date 2019/3/22
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

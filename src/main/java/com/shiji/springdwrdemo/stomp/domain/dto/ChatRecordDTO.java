@@ -11,8 +11,8 @@ import org.springframework.beans.BeanUtils;
 /**
  * 聊天记录数据传输层
  *
- * @author yanpanyi
- * @date 2019/4/4
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

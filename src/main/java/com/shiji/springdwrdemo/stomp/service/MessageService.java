@@ -7,8 +7,8 @@ import com.shiji.springdwrdemo.stomp.enums.inter.Code;
 /**
  * 消息处理
  *
- * @author yanpanyi
- * @date 2019/4/15
+ * @author xsy
+ * @date 2020/3/23
  */
 public interface MessageService {
 

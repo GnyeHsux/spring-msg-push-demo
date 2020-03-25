@@ -10,8 +10,8 @@ import java.util.Map;
 /**
  * 敏感词树节点
  *
- * @author yanpanyi
- * @date 2019/4/4
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

@@ -3,8 +3,8 @@ package com.shiji.springdwrdemo.stomp.constant;
 /**
  * 用户状态常量
  *
- * @author yanpanyi
- * @date 2019/3/22
+ * @author xsy
+ * @date 2020/3/23
  */
 public interface UserStatusConstant {
 

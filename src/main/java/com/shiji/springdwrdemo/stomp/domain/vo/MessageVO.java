@@ -14,8 +14,8 @@ import java.io.Serializable;
 /**
  * 消息视图
  *
- * @author yanpanyi
- * @date 2019/3/20
+ * @author xsy
+ * @date 2020/3/23
  */
 @ToString
 @NoArgsConstructor

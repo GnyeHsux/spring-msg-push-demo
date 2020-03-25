@@ -97,7 +97,7 @@ public class WebsocketServer {
             //在线数加1
         }
 
-        log.info("用户连接:" + userId + ",当前在线人数为:" + getOnlineCount());
+        log.debug("用户连接:" + userId + ",当前在线人数为:" + getOnlineCount());
 
         try {
             sendMessage(getRstStr("1", "服务器", "连接成功", getNowTimeStr()));
@@ -120,7 +120,7 @@ public class WebsocketServer {
             //从set中删除
             subOnlineCount();
         }
-        log.info("用户退出:" + userId + ",当前在线人数为:" + getOnlineCount());
+        log.debug("用户退出:" + userId + ",当前在线人数为:" + getOnlineCount());
     }
 
     /**
@@ -130,7 +130,7 @@ public class WebsocketServer {
      */
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.info("用户消息:" + userId + ",报文:" + message);
+        log.debug("用户消息:" + userId + ",报文:" + message);
         //可以群发消息
         //消息保存到数据库、redis
         if (!StringUtils.isEmpty(message)) {

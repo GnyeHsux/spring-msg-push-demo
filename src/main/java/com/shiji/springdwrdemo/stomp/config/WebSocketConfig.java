@@ -14,9 +14,9 @@ import javax.annotation.Resource;
 /**
  * websocket配置
  *
- * @author yanpanyi
+ * @author xsy
  * @EnableWebSocketMessageBroker 注解开启使用STOMP协议来传输基于MessageBroker代理的消息
- * @date 2019/3/20
+ * @date 2020/3/23
  */
 @Configuration
 @EnableWebSocketMessageBroker

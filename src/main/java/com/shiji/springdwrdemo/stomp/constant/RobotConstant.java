@@ -3,8 +3,8 @@ package com.shiji.springdwrdemo.stomp.constant;
 /**
  * 机器人相关常量
  *
- * @author yanpanyi
- * @date 2019/4/10
+ * @author xsy
+ * @date 2020/3/23
  */
 public interface RobotConstant {
     /**

@@ -3,8 +3,8 @@ package com.shiji.springdwrdemo.stomp.enums.inter;
 /**
  * 获取响应code
  *
- * @author yanpanyi
- * @date 2019/3/22
+ * @author xsy
+ * @date 2020/3/23
  */
 public interface Code {
 

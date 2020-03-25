@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * 聊天记录
  *
- * @author yanpanyi
- * @date 2019/4/4
+ * @author xsy
+ * @date 2020/3/23
  */
 public interface ChatRecordService {
 

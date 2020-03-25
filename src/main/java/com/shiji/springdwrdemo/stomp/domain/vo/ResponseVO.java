@@ -12,8 +12,8 @@ import java.io.Serializable;
 /**
  * 响应数据结构
  *
- * @author yanpanyi
- * @date 2019/3/20
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

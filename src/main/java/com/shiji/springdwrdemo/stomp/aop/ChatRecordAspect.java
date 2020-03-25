@@ -18,8 +18,8 @@ import javax.annotation.Resource;
 /**
  * 聊天记录切面类
  *
- * @author yanpanyi
- * @date 2019/4/23
+ * @author xsy
+ * @date 2020/3/23
  */
 @Aspect
 @Component
@@ -35,7 +35,7 @@ public class ChatRecordAspect {
 
     @Before("chatRecordPointcut()")
     public void doBefore(JoinPoint joinPoint) {
-        log.info("before -> {}", joinPoint);
+        log.debug("before -> {}", joinPoint);
 
         MessageVO messageVO = null;
         Object[] args = joinPoint.getArgs();
@@ -53,7 +53,7 @@ public class ChatRecordAspect {
             messageVO.setMessage(SensitiveWordUtils.loveChina(messageVO.getMessage()));
         }
 
-        log.info("添加聊天记录 -> {}", messageVO);
+        log.debug("添加聊天记录 -> {}", messageVO);
         chatRecordService.addRecord(ChatRecordDTO.toChatRecordDTO(messageVO));
     }
 

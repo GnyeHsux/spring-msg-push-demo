@@ -9,8 +9,8 @@ import java.lang.annotation.*;
  * 特定方法是指方法必需以MessageVO类或该类的子类作为参数，
  * 如果有多个MessageVO类或该类的子类作为参数，则默认取第一个
  *
- * @author yanpanyi
- * @date 2019/4/23
+ * @author xsy
+ * @date 2020/3/23
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

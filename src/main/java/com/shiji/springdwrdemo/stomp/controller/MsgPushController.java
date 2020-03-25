@@ -1,5 +1,6 @@
 package com.shiji.springdwrdemo.stomp.controller;
 
+import com.shiji.springdwrdemo.stomp.cache.UserCache;
 import com.shiji.springdwrdemo.stomp.constant.RobotConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.User;
@@ -42,7 +43,7 @@ public class MsgPushController {
         if (CheckUtils.checkMessage(message) && message.startsWith(RobotConstant.prefix)) {
             messageService.sendMessageToRobot(StompConstant.SUB_CHAT_ROOM, message, user);
         }
-
+        log.info("用户【{}】发送广播消息：【{}】", user.getUsername(), messageRO.getMessage());
         messageService.sendMessage(StompConstant.SUB_CHAT_ROOM, new MessageVO(user, message, messageRO.getImage(),
                 MessageTypeEnum.USER));
     }
@@ -59,6 +60,8 @@ public class MsgPushController {
         if (!CheckUtils.checkMessageRo(messageRO) || !CheckUtils.checkUser(user)) {
             throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);
         }
+
+        log.info("用户【{}】发送消息:【{}】到-->> 【{}】", user.getUsername(), messageRO.getMessage(), UserCache.getUsers(messageRO.getReceiver()));
 
         messageService.sendMessageToUser(messageRO.getReceiver(), new MessageVO(user, messageRO.getMessage(),
                 messageRO.getImage(), MessageTypeEnum.USER, messageRO.getReceiver()));

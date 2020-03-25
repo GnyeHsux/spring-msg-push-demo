@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 异常处理
  *
- * @author yanpanyi
+ * @author xsy
  */
 @Slf4j
 @RestControllerAdvice

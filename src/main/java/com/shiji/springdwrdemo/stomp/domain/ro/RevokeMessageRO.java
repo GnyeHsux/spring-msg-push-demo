@@ -11,7 +11,7 @@ import java.io.Serializable;
  * 撤消消息请求
  *
  * @author anlingyi
- * @date 2019/6/28
+ * @date 2020/3/23
  */
 @Getter
 @Setter

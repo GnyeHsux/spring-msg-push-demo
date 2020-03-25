@@ -1,6 +1,7 @@
 package com.shiji.springdwrdemo.stomp.cache;
 
 import com.shiji.springdwrdemo.stomp.domain.mo.User;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 缓存用户信息
  *
- * @author yanpanyi
- * @date 2019/3/24
+ * @author xsy
+ * @date 2020/3/23
  */
 public class UserCache {
 
@@ -55,6 +56,16 @@ public class UserCache {
      */
     public static User getUser(String key) {
         return USER_MAP.get(key);
+    }
+
+    public static User[] getUsers(String[] keys) {
+        User[] users = new User[]{};
+        if (ArrayUtils.isNotEmpty(keys)) {
+            for (String key : keys) {
+                users = ArrayUtils.add(users, USER_MAP.get(key));
+            }
+        }
+        return users;
     }
 
     /**

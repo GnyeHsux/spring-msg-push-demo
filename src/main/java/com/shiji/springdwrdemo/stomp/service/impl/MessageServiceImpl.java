@@ -22,8 +22,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 /**
- * @author yanpanyi
- * @date 2019/4/18
+ * @author xsy
+ * @date 2020/3/23
  */
 @Service
 @Slf4j
@@ -36,7 +36,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void sendErrorMessage(Code code, User user) {
-        log.info("发送错误信息 -> {} -> {}", code, user);
+        log.debug("发送错误信息 -> {} -> {}", code, user);
         messagingTemplate.convertAndSendToUser(user.getUserId(), StompConstant.SUB_ERROR, new ResponseVO(code));
     }
 
@@ -75,10 +75,10 @@ public class MessageServiceImpl implements MessageService {
     @Async
     @Override
     public void sendMessageToRobot(String subAddress, String message, User user) throws Exception {
-        log.info("user: {} -> 发送消息到机器人 -> {}", user, message);
+        log.debug("user: {} -> 发送消息到机器人 -> {}", user, message);
         /*String robotMessage = robotService.sendMessage(user.getUserId(), message.replaceFirst(RobotConstant.prefix,
                 ""));
-        log.info("机器人响应结果 -> {}", robotMessage);
+        log.debug("机器人响应结果 -> {}", robotMessage);
         sendRobotMessage(subAddress, robotMessage);*/
     }
 

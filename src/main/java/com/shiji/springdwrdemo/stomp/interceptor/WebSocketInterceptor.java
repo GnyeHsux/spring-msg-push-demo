@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 /**
  * webcocket拦截器
  *
- * @author yanpanyi
- * @date 2019/3/24
+ * @author xsy
+ * @date 2020/3/23
  */
 @Component
 @Slf4j
@@ -32,7 +32,7 @@ public class WebSocketInterceptor implements ChannelInterceptor {
      */
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        log.info("进入拦截器 -> preSend");
+        log.debug("进入拦截器 -> preSend");
         StompHeaderAccessor stompHeaderAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (StompCommand.CONNECT.equals(stompHeaderAccessor.getCommand())) {

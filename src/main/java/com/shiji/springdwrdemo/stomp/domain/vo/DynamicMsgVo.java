@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * 聊天室动态消息
  *
- * @author yanpanyi
- * @date 2019/3/22
+ * @author xsy
+ * @date 2020/3/23
  */
 @Getter
 @Setter

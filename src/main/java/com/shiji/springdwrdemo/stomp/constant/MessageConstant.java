@@ -4,7 +4,7 @@ package com.shiji.springdwrdemo.stomp.constant;
  * 消息模板
  *
  * @author anlingyi
- * @date 2019/5/7
+ * @date 2020/3/23
  */
 public interface MessageConstant {
     /**
