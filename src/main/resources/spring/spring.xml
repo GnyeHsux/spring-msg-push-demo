@@ -5,9 +5,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.directwebremoting.org/schema/spring-dwr http://www.directwebremoting.org/schema/spring-dwr-3.0.xsd">
 
-<!--    <dwr:annotation-config/>-->
+    <dwr:annotation-config/>
 
-<!--    <dwr:annotation-scan scanRemoteProxy="false" base-package="com.shiji.springdwrdemo.dwr"/>-->
+    <dwr:annotation-scan scanRemoteProxy="false" base-package="com.shiji.springdwrdemo.dwr"/>
 
-<!--    <dwr:configuration/>-->
+    <dwr:configuration/>
 </beans>

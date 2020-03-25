@@ -33,7 +33,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         // 广播式使用/topic，点对点式使用/user
-        registry.enableSimpleBroker(StompConstant.STOMP_TOPIC, StompConstant.STOMP_USER, "/app");
+        registry.enableSimpleBroker(StompConstant.STOMP_TOPIC, StompConstant.STOMP_USER);
     }
 
     /**

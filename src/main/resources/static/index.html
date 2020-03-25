@@ -168,9 +168,9 @@
         var data = {
             "message": content
         };
-        var pub = '/app/chatRoom';
+        var pub = '/chatRoom';
         if ('user' === type) {
-            pub = '/app/chat';
+            pub = '/chat';
             data.receiver = [$("#toUserId").val()];
         }
 
