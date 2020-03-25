@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Websocket Demo</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="js/vconsole.min.js"></script>
 </head>
 <style>
+    input {outline: none}
     .websocket {
         width: 800px;
-        height: 600px;
         border: 1px solid #ccc;
         margin: 100px auto 0 auto;
         text-align: center;
@@ -56,34 +60,96 @@
         cursor: pointer;
     }
 </style>
-<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
-<script th:inline="javascript">
+<script>
+    var vConsole = new VConsole();
+    // var ip = [[${ip}]];
+    var ip = "localhost";
+    // var ip = "172.17.13.72";
 
-    window.onload = function () {
-        setInterval(getOnlineUser, 3000)
+
+
+    var stompClient = null;
+    var onlineUserList = [];
+
+    function connect() {
+        var socket = new SockJS('/stomp-websocket');
+        stompClient = Stomp.over(socket);
+
+        // 每隔30秒做一次心跳检测
+        stompClient.heartbeat.outgoing = 30000;
+        // 客户端不接收服务器的心跳检测
+        stompClient.heartbeat.incoming = 0;
+
+        if ($("#userId").val() == '') {
+            alert("你是谁？");
+            return;
+        }
+
+        var user = {
+            'username': $("#userId").val(),
+            'avatar': 'https://whycode.icu/user.jpeg',
+            'address': "地球村"
+        };
+        stompClient.connect(user, function (frame) {
+            $('#openSocket').attr("disabled", true);
+            console.log('Connected: ' + frame);
+            uid = frame.headers['user-name'];
+
+            if (uid === undefined) {
+                alert("建立连接失败，请重新连接！");
+            }
+
+            //订阅用户状态
+            stompClient.subscribe('/topic/status', function (data) {
+                data = JSON.parse(data.body).data;
+                var msg = `<p style="color: orangered">${"系统消息: " + data.message}</p>`;
+                showMsg(msg);
+                //刷新在线列表
+                flushOnlineGroup(data);
+            });
+
+            //订阅发给自己的消息
+            stompClient.subscribe('/user/' + uid + '/chat', function (data) {
+                data = JSON.parse(data.body).data;
+                var msg = `<p style="color: black">${data.user.username + ": " + data.message}</p>`;
+                showMsg(msg);
+            });
+
+            //订阅聊天室的消息
+            stompClient.subscribe('/topic/chatRoom', function (data) {
+                data = JSON.parse(data.body).data;
+                if ($("#userId").val() === data.user.username) {
+                    data.user.username = '我';
+                }
+                var msg = `<p style="color: black">${data.user.username + ": " + data.message}</p>`;
+                showMsg(msg);
+            });
+        });
+
     }
 
-    // var ip = [[${ip}]];
-    // var ip = "localhost";
-    var ip = "172.17.13.72";
-
-    function getOnlineUser() {
-        $.ajax({
-            type: "GET",
-
-            url: "http://" + ip +":8081/getOnlineUser",
-            // url: "http://47.106.122.141:8080/getOnlineUser",
-            data: {},
-            dataType: "JSON",
-            success: function (result) {
-                $("#olUser").empty();
-                for (index in result) {
-                    if (result[index] != $("#userId").val()) {
-                        $("#olUser").append(`<li>${result[index]}</li>`)
-                    }
-                }
+    function flushOnlineGroup(data) {
+        onlineUserList = data.onlineUserList;
+        $("#olUser").empty();
+        for (index in onlineUserList) {
+            if (onlineUserList[index].userId != uid) {
+                $("#olUser").append(`<li>${onlineUserList[index].username}</li>`)
             }
-        });
+        }
+        $("#users").empty();
+        for (index in onlineUserList) {
+            if (onlineUserList[index].userId != uid) {
+                $("#users").append(`<option value="${onlineUserList[index].username}">`)
+            }
+        }
+    }
+
+    function disConnect() {
+        // 客户端主动关闭连接
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        $('#openSocket').attr("disabled", false);
     }
 
     function openSocket() {
@@ -160,6 +226,62 @@
             behavior: "smooth"
         })
     }
+
+    function sendMsg(type) {
+        // 获取发送的内容
+        var content = $("#msg-need-send").val();
+        // 内容不能为空
+        if (content.trim().length < 1) {
+            return;
+        }
+
+        var data = {
+            "message": content
+        };
+        var pub = '/app/chatRoom';
+        if ('user' === type) {
+            pub = '/app/chat';
+            data.receiver = [getUserIdByName($("#toUserId").val())];
+        }
+
+        data = JSON.stringify(data);
+        sendMessage(pub, {}, data);
+
+        if ('user' === type) {
+            var msg = `<p style="color: black">${"我: " + content}</p>`;
+            showMsg(msg);
+        }
+
+        $("#msg-need-send").val('');
+    }
+    /**
+     * 发送信息到指定地址
+     * @param pub 发布地址
+     * @param header 设置请求头
+     * @param data 发送的内容
+     */
+    function sendMessage(pub, header, data) {
+        stompClient.send(pub, header, data);
+    }
+
+    /**
+     * 通过name获取userid
+     * @param name
+     * @returns {Document.userId|string}
+     */
+    function getUserIdByName(name) {
+        if (name == '') {
+            return '';
+        }
+
+        for (var i = 0; i < onlineUserList.length; i++) {
+            var obj = onlineUserList[i];
+            if (obj.userId !== uid && obj.username === name) {
+                return obj.userId;
+            }
+        }
+    }
+
 </script>
 <body>
 <div class="websocket">
@@ -170,10 +292,11 @@
     </div>
     <div>
         <p>【我是】： <input id="userId" name="userId" type="text" value="收银员">
-        <p>【发送给】： <input id="toUserId" name="toUserId" type="text" value="">
-        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="东湖门店组">
-        <p>【操作】：
-            <button id="openSocket" onclick="openSocket()">开启socket通讯</button>
+        <p>【发送给】： <input list="users" id="toUserId" name="toUserId">
+        <datalist id="users">
+        </datalist>
+<!--        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="东湖门店组">-->
+        <p>【操作】：<button id="openSocket" onclick="connect()">开启socket通讯</button>
     </div>
     <div class="receive">
         <p>服务端返回的消息</p>
@@ -182,11 +305,11 @@
     <div class="send">
         <textarea type="text" id="msg-need-send"></textarea>
         <p>
-            <button class="sendBtn" id="send-btn">发个人消息</button>
-            <button class="sendBtn" id="send-group-btn">发群消息</button>
+            <button class="sendBtn" id="send-btn" onclick="sendMsg('user')">发个人消息</button>
+            <button class="sendBtn" id="send-group-btn" onclick="sendMsg('group')">发群消息</button>
         </p>
     </div>
-    <button id="exit">关闭连接</button>
+    <button id="exit" onclick="disConnect()">关闭连接</button>
 </div>
 </body>
 </html>

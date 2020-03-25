@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
-@Service
-@RemoteProxy
+//@Service
+//@RemoteProxy
 public class DwrService {
 
     @RemoteMethod
