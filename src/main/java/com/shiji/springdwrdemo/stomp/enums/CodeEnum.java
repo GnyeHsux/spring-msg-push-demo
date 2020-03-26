@@ -30,7 +30,7 @@ public enum CodeEnum implements Code {
     /**
      * Token验证不通过
      */
-    INVALID_TOKEN(502, "没有权限！"),
+    INVALID_TOKEN(502, "别调皮！莫得权限！！！"),
     /**
      * 处理失败
      */

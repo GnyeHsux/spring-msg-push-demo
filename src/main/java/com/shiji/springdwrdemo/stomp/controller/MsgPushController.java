@@ -5,7 +5,9 @@ import com.shiji.springdwrdemo.stomp.constant.RobotConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.User;
 import com.shiji.springdwrdemo.stomp.domain.ro.MessageRO;
+import com.shiji.springdwrdemo.stomp.domain.ro.RevokeMessageRO;
 import com.shiji.springdwrdemo.stomp.domain.vo.MessageVO;
+import com.shiji.springdwrdemo.stomp.domain.vo.RevokeMsgVo;
 import com.shiji.springdwrdemo.stomp.enums.CodeEnum;
 import com.shiji.springdwrdemo.stomp.enums.MessageTypeEnum;
 import com.shiji.springdwrdemo.stomp.enums.inter.Code;
@@ -84,5 +86,35 @@ public class MsgPushController {
         }
 
         messageService.sendErrorMessage(code, user);
+    }
+
+    /**
+     * 撤回消息
+     *
+     * @param revokeMessageRO 撤消消息请求对象
+     * @param user 发送消息的用户对象
+     * @throws Exception
+     */
+    @MessageMapping(StompConstant.PUB_CHAT_ROOM_REVOKE)
+    public void revokeMessage(RevokeMessageRO revokeMessageRO, User user) throws Exception {
+        if (revokeMessageRO == null || !CheckUtils.checkUser(user)) {
+            throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);
+        }
+
+        CheckUtils.checkMessageId(revokeMessageRO.getMessageId(), user.getUserId());
+
+        RevokeMsgVo revokeMsgVo = new RevokeMsgVo();
+        revokeMsgVo.setRevokeMessageId(revokeMessageRO.getMessageId());
+        revokeMsgVo.setUser(user);
+        revokeMsgVo.setType(MessageTypeEnum.REVOKE);
+
+        if (CheckUtils.checkReceiver(revokeMessageRO.getReceiver())) {
+            // 将消息发送到指定用户
+            messageService.sendMessageToUser(revokeMessageRO.getReceiver(), revokeMsgVo);
+            return;
+        }
+
+        // 将消息发送到所有用户
+        messageService.sendMessage(StompConstant.SUB_CHAT_ROOM, revokeMsgVo);
     }
 }

@@ -107,8 +107,17 @@
             //订阅发给自己的消息
             stompClient.subscribe('/user/' + uid + '/chat', function (data) {
                 data = JSON.parse(data.body).data;
-                var msg = `<p style="color: black">${data.user.username + ": " + data.message}</p>`;
-                showMsg(msg);
+                if (uid === data.user.userId) {
+                    data.user.username = '我';
+                }
+                if (data.type == 'REVOKE') {
+                    var obj = document.getElementById(data.revokeMessageId);
+                    obj.remove();
+                    showMsg(`<p style="color: gray">${data.user.username + '撤回了一条消息！'}</p>`)
+                } else {
+                    var msg = `<p style="color: black" ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}">${data.user.username + ": " + data.message}</p>`;
+                    showMsg(msg);
+                }
             });
 
             //订阅聊天室的消息
@@ -117,11 +126,50 @@
                 if (uid === data.user.userId) {
                     data.user.username = '我';
                 }
-                var msg = `<p style="color: black">${data.user.username + ": " + data.message}</p>`;
-                showMsg(msg);
+                if (data.type == 'REVOKE') {
+                    var obj = document.getElementById(data.revokeMessageId);
+                    obj.remove();
+                    showMsg(`<p style="color: gray">${data.user.username + '撤回了一条消息！'}</p>`)
+                } else {
+                    var msg = `<p style="color: black" ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}">${data.user.username + ": " + data.message}</p>`;
+                    showMsg(msg);
+                }
+            });
+
+            // 错误信息订阅
+            stompClient.subscribe('/user/' + uid + '/error', function (data) {
+                getData(data.body);
             });
         });
 
+    }
+
+    /**
+     * 解析响应数据
+     * @param data
+     * @returns {*}
+     */
+    function getData(data) {
+        var obj = JSON.parse(data);
+        codeMapping(obj);
+        return obj.data;
+    }
+
+    /**
+     * 响应码映射
+     * @param date
+     */
+    function codeMapping(date) {
+        switch (date.code) {
+            case 200:
+                break;
+            case 404:
+                alert("404");
+                break;
+            default:
+                alert(date.desc);
+                break;
+        }
     }
 
     function flushOnlineGroup(data) {
@@ -171,18 +219,32 @@
         var pub = '/chatRoom';
         if ('user' === type) {
             pub = '/chat';
-            data.receiver = [$("#toUserId").val()];
+            data.receiver = [$("#toUserId").val(), uid];
         }
 
         data = JSON.stringify(data);
         sendMessage(pub, {}, data);
 
-        if ('user' === type) {
-            var msg = `<p style="color: black">${"我: " + content}</p>`;
-            showMsg(msg);
+        $("#msg-need-send").val('');
+    }
+
+    function revokeMsg(e) {
+        var dom = $(e);
+        var messageId = dom.attr("id");
+        var receiver = dom.attr("receiver")
+
+        if (receiver === null || receiver === '' || receiver === 'null' || messageId === undefined) {
+            receiver = null;
+        } else {
+            receiver = receiver.split(',');
         }
 
-        $("#msg-need-send").val('');
+        var data = JSON.stringify({
+            'messageId': messageId,
+            'receiver': receiver
+        });
+
+        sendMessage('/chatRoom/revoke', {}, data);
     }
     /**
      * 发送信息到指定地址

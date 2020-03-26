@@ -22,7 +22,7 @@ public class CheckUtils {
     /**
      * 撤消消息过期时间 3分钟
      */
-    private static final long MESSAGE_EXPIRE_DATE = 180000;
+    private static final long MESSAGE_EXPIRE_DATE = 60000;
 
     /**
      * 设置的访问密码
