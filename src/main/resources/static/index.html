@@ -2,64 +2,15 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title>Websocket Demo</title>
+	<link rel="stylesheet" href="common.css">
     <script src="js/jquery.js"></script>
     <script src="js/sockjs.min.js"></script>
     <script src="js/stomp.min.js"></script>
     <script src="js/vconsole.min.js"></script>
+    <script src="js/calc.js"></script>
 </head>
-<style>
-    input {outline: none}
-    .websocket {
-        width: 800px;
-        border: 1px solid #ccc;
-        margin: 100px auto 0 auto;
-        text-align: center;
-    }
-
-    .onLineUser {
-        height: 600px;
-        text-align: left;
-        float: right;
-        padding-right: 100px;
-    }
-
-    .receive {
-    }
-
-    #receive-box {
-        width: 300px;
-        height: 200px;
-        overflow: auto;
-        margin: 0 auto 24px auto;
-        border: 1px black solid;
-        border-radius: 10px;
-    }
-
-    #msg-need-send {
-        width: 300px;
-        height: 100px;
-        resize: none;
-        border-radius: 10px;
-    }
-
-    .sendBtn {
-        border: none;
-        border-radius: 5px;
-        background: #25d1ff;
-        padding: 5px 10px;
-        color: #fff;
-        cursor: pointer;
-    }
-
-    #exit {
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background: none;
-        padding: 5px 10px;
-        cursor: pointer;
-    }
-</style>
 <script>
     // 是否打开通知
     var openNotice = true;
@@ -85,7 +36,7 @@
         });
     }
 
-    var vConsole = new VConsole();
+    // var vConsole = new VConsole();
 
     var stompClient = null;
     var onlineUserList = [];
@@ -419,7 +370,65 @@
 
 </script>
 <body>
-<div class="websocket">
+<div class="main">
+	<div class="page-pre-enter">
+		<div class="enter-bg"></div>
+		<div class="enter-sec flex-row">
+			<input type="text" placeholder="请输入您的昵称" class="sec-input" />
+			<div class="sec-btn">进入聊天室</div>
+		</div>
+	</div>
+	
+	<div class="chat-room">
+		<div class="room-head">
+			<img src="images/msg_icon.png" class="head-msg">
+			<span>凉瓜铺</span>
+			<div class="head-bot">···</div>
+		</div>
+		<div class="room-container">
+			<ul class="room-ul">
+				<li class="con-li flex-row">
+					<img src="images/avator.png" class="li-avator" >
+					<div class="li-info">
+						<div class="info-name">收银员</div>
+						<div class="li-content">在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户</div>
+					</div>
+				</li>
+				<!-- 判断下用户名，如果消息用户等于当前缓存用户customName，就加上 user-li，顺便换个头像 -->
+				<li class="con-li flex-row user-li">
+					<div class="li-info">
+						<div class="info-name">收银员</div>
+						<div class="li-content">在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户</div>
+					</div>
+					<img src="images/avator.png" class="li-avator" >
+				</li>
+			</ul>
+		</div>
+		<!-- <div style="height: 1.4rem;background: white;"></div> -->
+		<div class="chat-bot flex-row">
+			<input type="text" class="bot-input" />
+			<div class="bot-btn menu-add"></div>
+			<div class="bot-btn" onclick="sendMsg('group')"></div>
+			<div class="menu-layer">
+				<div class="con-menu"></div>
+				<label for="file" class="con-menu">
+					<span>图片</span>
+					<input type="file" style="display: none" id="file" onchange="sendImage()"/>
+				</label>
+			</div>
+		</div>
+		
+		<div class="mask" onclick="hideMask()"></div>
+		<div class="online-layer">
+			<div class="line-head">当前在线用户</div>
+			<ul class="line-ul">
+				<li class="line-li bdb-1px">收银员</li>
+				<li class="line-li bdb-1px">收银员</li>
+			</ul>
+		</div>
+	</div>
+	
+	
     <div class="onLineUser">
         <p>在线用户：</p>
         <ol id="olUser">
@@ -448,5 +457,65 @@
     <button id="exit" onclick="disConnect()">关闭连接</button>
 </div>
 <audio id="beep" src="./sounds/qq.mp3"></audio>
+	
+	<script>
+		// for(let i =0;i<10;i++){
+		// 	$('.room-ul').append('<li class="con-li flex-row">'+
+		// 				'<img src="images/avator.png" class="li-avator" >'+
+		// 				'<div class="li-info">'+
+		// 					'<div class="info-name">收银员</div>'+
+		// 					'<div class="li-content">在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户</div>'+
+		// 				'</div>'+
+		// 			'</li>')
+		// }
+		
+		function hideMask(){
+			$('.mask').hide()
+			$('.online-layer').removeClass('show-layer')
+		}
+		
+		$('.room-head .head-msg').on('click',function(){
+			$('.mask').show()
+			$('.online-layer').addClass('show-layer')
+		})
+		
+		$('.menu-add').on('click',function(){
+			$('.chat-bot .menu-layer').toggleClass('show-layer')
+		})
+		
+		$('.enter-sec .sec-btn').on('click',function(){
+			const customName = $('.enter-sec .sec-input').val()
+			if(customName === ''){
+				return
+			}else{
+				let userList = window.localStorage.getItem('userList')
+				if(userList != null){
+					userList = JSON.parse(userList)
+					if(userList.length > 0){
+						const checkUser = () =>{
+							for(let i in userList){
+								if(userList[i].name === customName){
+									return true
+								}
+								return false
+							}
+						}
+						if(!checkUser()){
+							userList.push({
+								id: userList.length+1,
+								name: customName
+							})
+						}
+					}
+				}else{
+					userList = [ {id:1, name:customName}]
+				}
+				window.localStorage.setItem('userList',JSON.stringify(userList))
+				window.localStorage.setItem('customName',JSON.stringify(customName))
+				$(".page-pre-enter").addClass('hide-enter')
+				connect()
+			}
+		})
+	</script>
 </body>
 </html>
