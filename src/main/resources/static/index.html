@@ -61,6 +61,29 @@
     }
 </style>
 <script>
+    // 是否打开通知
+    var openNotice = true;
+
+    // 窗口可见
+    var visible = true;
+    // 是否打开提示音
+    var opendSound = true;
+
+    var title = document.title;
+
+    window.onload = function () {
+        // 监听窗口切换
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "hidden") {
+                // 窗口不可见
+                visible = false;
+            } else if (document.visibilityState === "visible") {
+                // 窗口可见
+                visible = true;
+                document.title = title;
+            }
+        });
+    }
 
     var vConsole = new VConsole();
 
@@ -109,7 +132,9 @@
                 data = JSON.parse(data.body).data;
                 if (uid === data.user.userId) {
                     data.user.username = '我';
+                    openNotice = false;
                 }
+                openNotice = true;
                 if (data.type == 'REVOKE') {
                     var obj = document.getElementById(data.revokeMessageId);
                     obj.remove();
@@ -123,6 +148,9 @@
                     }
                     showMsg(msg);
                 }
+
+                // 消息通知
+                msgNotice(data);
             });
 
             //订阅聊天室的消息
@@ -130,7 +158,9 @@
                 data = JSON.parse(data.body).data;
                 if (uid === data.user.userId) {
                     data.user.username = '我';
+                    openNotice = false;
                 }
+                openNotice = true;
                 if (data.type == 'REVOKE') {
                     var obj = document.getElementById(data.revokeMessageId);
                     obj.remove();
@@ -144,6 +174,10 @@
                     }
                     showMsg(msg);
                 }
+
+
+                // 消息通知
+                msgNotice(data);
             });
 
             // 错误信息订阅
@@ -346,6 +380,43 @@
         sendMessage('/chatRoom', {}, data);
     }
 
+    /**
+     * 消息通知
+     * @param data
+     */
+
+
+    function msgNotice(data) {
+        // 已开启通知且窗口不可见才进行消息通知
+        if (openNotice && !visible) {
+            // 通过标题通知
+            msgNoticeByTitle();
+            // 通过浏览器的消息通知支持进行通知
+            // msgNoticeByBrowser(data);
+        }
+    }
+
+    function msgNoticeByTitle() {
+        if (!openNotice || visible) {
+            // 未开启通知或窗口可见，不进行提醒
+            return;
+        }
+
+        if (opendSound) {
+            // 提示音
+            beep();
+        }
+        // 窗口不可见显示提醒
+        document.title = '有新消息啦！！！';
+    }
+    /**
+     * 播放提示音
+     */
+    function beep() {
+        var beep = document.getElementById('beep');
+        beep.play();
+    }
+
 </script>
 <body>
 <div class="websocket">
@@ -376,5 +447,6 @@
     </div>
     <button id="exit" onclick="disConnect()">关闭连接</button>
 </div>
+<audio id="beep" src="./sounds/qq.mp3"></audio>
 </body>
 </html>
