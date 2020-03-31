@@ -34,7 +34,6 @@ public class WebSocketInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         log.debug("进入拦截器 -> preSend");
         StompHeaderAccessor stompHeaderAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
         if (StompCommand.CONNECT.equals(stompHeaderAccessor.getCommand())) {
             User user = new User();
             user.setUserId(UUIDUtils.create());
