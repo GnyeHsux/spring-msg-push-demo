@@ -373,46 +373,48 @@ function hideMask() {
     $('.online-layer').removeClass('show-layer')
 }
 
-$('.room-head .head-msg').on('click', function () {
-    $('.mask').show()
-    $('.online-layer').addClass('show-layer')
-})
+$(document).ready(function () {
+    $('.room-head .head-msg').on('click', function () {
+        $('.mask').show()
+        $('.online-layer').addClass('show-layer')
+    })
 
-$('.menu-add').on('click', function () {
-    $('.chat-bot .menu-layer').toggleClass('show-layer')
-})
+    $('.menu-add').on('click', function () {
+        $('.chat-bot .menu-layer').toggleClass('show-layer')
+    })
 
-$('.enter-sec .sec-btn').on('click', function () {
-    const customName = $('.enter-sec .sec-input').val()
-    console.log(customName)
-    if (customName === '') {
-        return
-    } else {
-        let userList = window.localStorage.getItem('userList')
-        if (userList != null) {
-            userList = JSON.parse(userList)
-            if (userList.length > 0) {
-                const checkUser = () => {
-                    for (let i in userList) {
-                        if (userList[i].name === customName) {
-                            return true
+    $('.enter-sec .sec-btn').on('click', function () {
+        const customName = $('.enter-sec .sec-input').val()
+        console.log(customName)
+        if (customName === '') {
+            return
+        } else {
+            let userList = window.localStorage.getItem('userList')
+            if (userList != null) {
+                userList = JSON.parse(userList)
+                if (userList.length > 0) {
+                    const checkUser = () => {
+                        for (let i in userList) {
+                            if (userList[i].name === customName) {
+                                return true
+                            }
+                            return false
                         }
-                        return false
+                    }
+                    if (!checkUser()) {
+                        userList.push({
+                            id: userList.length + 1,
+                            name: customName
+                        })
                     }
                 }
-                if (!checkUser()) {
-                    userList.push({
-                        id: userList.length + 1,
-                        name: customName
-                    })
-                }
+            } else {
+                userList = [{id: 1, name: customName}]
             }
-        } else {
-            userList = [{id: 1, name: customName}]
+            window.localStorage.setItem('userList', JSON.stringify(userList))
+            window.localStorage.setItem('customName', JSON.stringify(customName))
+            $(".page-pre-enter").addClass('hide-enter')
+            connect()
         }
-        window.localStorage.setItem('userList', JSON.stringify(userList))
-        window.localStorage.setItem('customName', JSON.stringify(customName))
-        $(".page-pre-enter").addClass('hide-enter')
-        connect()
-    }
+    })
 })
