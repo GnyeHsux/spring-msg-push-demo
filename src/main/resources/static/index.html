@@ -4,371 +4,14 @@
     <meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
     <title>Websocket Demo</title>
-	<link rel="stylesheet" href="common.css">
+	<link rel="stylesheet" href="css/common.css">
     <script src="js/jquery.js"></script>
     <script src="js/sockjs.min.js"></script>
     <script src="js/stomp.min.js"></script>
     <script src="js/vconsole.min.js"></script>
     <script src="js/calc.js"></script>
+    <script src="js/common.js"></script>
 </head>
-<script>
-    // 是否打开通知
-    var openNotice = true;
-
-    // 窗口可见
-    var visible = true;
-    // 是否打开提示音
-    var opendSound = true;
-
-    var title = document.title;
-
-    window.onload = function () {
-        // 监听窗口切换
-        document.addEventListener("visibilitychange", function () {
-            if (document.visibilityState === "hidden") {
-                // 窗口不可见
-                visible = false;
-            } else if (document.visibilityState === "visible") {
-                // 窗口可见
-                visible = true;
-                document.title = title;
-            }
-        });
-    }
-
-    // var vConsole = new VConsole();
-
-    var stompClient = null;
-    var onlineUserList = [];
-
-    function connect() {
-        var socket = new SockJS('/stomp-websocket');
-        stompClient = Stomp.over(socket);
-
-        // 每隔30秒做一次心跳检测
-        stompClient.heartbeat.outgoing = 30000;
-        // 客户端不接收服务器的心跳检测
-        stompClient.heartbeat.incoming = 0;
-
-        if ($("#userId").val() == '') {
-            alert("你是谁？");
-            return;
-        }
-
-        var user = {
-            'username': $("#userId").val(),
-            'avatar': 'https://whycode.icu/user.jpeg',
-            'address': "地球村"
-        };
-        stompClient.connect(user, function (frame) {
-            $('#openSocket').attr("disabled", true);
-            console.log('Connected: ' + frame);
-            uid = frame.headers['user-name'];
-
-            if (uid === undefined) {
-                alert("建立连接失败，请重新连接！");
-            }
-
-            //订阅用户状态
-            stompClient.subscribe('/topic/status', function (data) {
-                data = JSON.parse(data.body).data;
-                var msg = `<p style="color: orangered">${"系统消息: " + data.message}</p>`;
-                showMsg(msg);
-                //刷新在线列表
-                flushOnlineGroup(data);
-            });
-
-            //订阅发给自己的消息
-            stompClient.subscribe('/user/' + uid + '/chat', function (data) {
-                data = JSON.parse(data.body).data;
-                if (uid === data.user.userId) {
-                    data.user.username = '我';
-                    openNotice = false;
-                }
-                openNotice = true;
-                if (data.type == 'REVOKE') {
-                    var obj = document.getElementById(data.revokeMessageId);
-                    obj.remove();
-                    showMsg(`<p style="color: gray">${data.user.username + '撤回了一条消息！'}</p>`)
-                } else {
-                    var msg = null;
-                    if (data.image == null) {
-                        msg = `<p style="color: black" ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}">${data.user.username + ": " + data.message}</p>`;
-                    } else {
-                        msg = `<div ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}" class="show_image"><img style="height: 5em" src="${data.image}"/></div>`;
-                    }
-                    showMsg(msg);
-                }
-
-                // 消息通知
-                msgNotice(data);
-            });
-
-            //订阅聊天室的消息
-            stompClient.subscribe('/topic/chatRoom', function (data) {
-                data = JSON.parse(data.body).data;
-                if (uid === data.user.userId) {
-                    data.user.username = '我';
-                    openNotice = false;
-                }
-                openNotice = true;
-                if (data.type == 'REVOKE') {
-                    var obj = document.getElementById(data.revokeMessageId);
-                    obj.remove();
-                    showMsg(`<p style="color: gray">${data.user.username + '撤回了一条消息！'}</p>`)
-                } else {
-                    var msg = null;
-                    if (data.image == null) {
-                        msg = `<p style="color: black" ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}">${data.user.username + ": " + data.message}</p>`;
-                    } else {
-                        msg = `<div ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}" class="show_image"><img style="height: 5em" src="${data.image}"/></div>`;
-                    }
-                    showMsg(msg);
-                }
-
-
-                // 消息通知
-                msgNotice(data);
-            });
-
-            // 错误信息订阅
-            stompClient.subscribe('/user/' + uid + '/error', function (data) {
-                getData(data.body);
-            });
-
-            stompClient.onclose = function (e) {
-                alert("掉线了！！！")
-            }
-        });
-
-    }
-
-    /**
-     * 解析响应数据
-     * @param data
-     * @returns {*}
-     */
-    function getData(data) {
-        var obj = JSON.parse(data);
-        codeMapping(obj);
-        return obj.data;
-    }
-
-    /**
-     * 响应码映射
-     * @param date
-     */
-    function codeMapping(date) {
-        switch (date.code) {
-            case 200:
-                break;
-            case 404:
-                alert("404");
-                break;
-            default:
-                alert(date.desc);
-                break;
-        }
-    }
-
-    function flushOnlineGroup(data) {
-        onlineUserList = data.onlineUserList;
-        $("#olUser").empty();
-        for (index in onlineUserList) {
-            if (onlineUserList[index].userId != uid) {
-                $("#olUser").append(`<li>${onlineUserList[index].username}</li>`)
-            }
-        }
-        $("#toUserId").empty();
-        for (index in onlineUserList) {
-            if (onlineUserList[index].userId != uid) {
-                $("#toUserId").append(`<option value="${onlineUserList[index].userId}">${onlineUserList[index].username}</option>`)
-            }
-        }
-    }
-
-    function disConnect() {
-        // 客户端主动关闭连接
-        if (stompClient !== null) {
-            stompClient.disconnect();
-        }
-        $('#openSocket').attr("disabled", false);
-    }
-
-    function showMsg(data) {
-        var receiveBox = document.getElementById("receive-box")
-        receiveBox.innerHTML += `${data}`
-        receiveBox.scrollTo({
-            top: receiveBox.scrollHeight,
-            behavior: "smooth"
-        })
-    }
-
-    function sendMsg(type) {
-        // 获取发送的内容
-        var content = $("#msg-need-send").val();
-        // 内容不能为空
-        if (content.trim().length < 1) {
-            return;
-        }
-
-        var data = {
-            "message": content
-        };
-        var pub = '/chatRoom';
-        if ('user' === type) {
-            pub = '/chat';
-            data.receiver = [$("#toUserId").val(), uid];
-        }
-
-        data = JSON.stringify(data);
-        sendMessage(pub, {}, data);
-
-        $("#msg-need-send").val('');
-    }
-
-    function revokeMsg(e) {
-        var dom = $(e);
-        var messageId = dom.attr("id");
-        var receiver = dom.attr("receiver")
-
-        if (receiver === null || receiver === '' || receiver === 'null' || messageId === undefined) {
-            receiver = null;
-        } else {
-            receiver = receiver.split(',');
-        }
-
-        var data = JSON.stringify({
-            'messageId': messageId,
-            'receiver': receiver
-        });
-
-        sendMessage('/chatRoom/revoke', {}, data);
-    }
-    /**
-     * 发送信息到指定地址
-     * @param pub 发布地址
-     * @param header 设置请求头
-     * @param data 发送的内容
-     */
-    function sendMessage(pub, header, data) {
-        stompClient.send(pub, header, data);
-    }
-
-    /**
-     * 通过name获取userid
-     * @param name
-     * @returns {Document.userId|string}
-     */
-    function getUserIdByName(name) {
-        if (name == '') {
-            return '';
-        }
-
-        for (var i = 0; i < onlineUserList.length; i++) {
-            var obj = onlineUserList[i];
-            if (obj.userId !== uid && obj.username === name) {
-                return obj.userId;
-            }
-        }
-    }
-
-    /**
-     * 选择文件
-     */
-    function selectFile() {
-        $('#file').click();
-    }
-
-    function sendImage() {
-        var image = $("#file").val();
-        if (image === '' || image === undefined) {
-            return;
-        }
-
-        var filename = image.replace(/.*(\/|\\)/, "");
-        var fileExt = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename.toUpperCase()) : '';
-
-        var file = $('#file').get(0).files[0];
-        var fileSize = file.size;
-        var mb = 30;
-        var maxSize = mb * 1024 * 1024;
-
-        if (fileExt != 'PNG' && fileExt != 'GIF' && fileExt != 'JPG' && fileExt != 'JPEG' && fileExt != 'BMP') {
-            alert('发送失败，图片格式有误！');
-            return;
-        } else if (parseInt(fileSize) > parseInt(maxSize)) {
-            alert('上传的图片不能超过' + mb + 'MB');
-            return;
-        } else {
-            var data = new FormData();
-            data.append('file', file);
-            $.ajax({
-                url: "/api/upload/image",
-                type: 'POST',
-                data: data,
-                dataType: 'JSON',
-                cache: false,
-                processData: false,
-                contentType: false,
-                success: function (data) {
-                    codeMapping(data);
-                    var rep = data.data;
-                    sendImageToChatRoom(rep.path);
-                    // console.log(data.data);
-                }
-            });
-        }
-    }
-
-    /**
-     * 发送图片到聊天室
-     */
-    function sendImageToChatRoom(image) {
-        var data = JSON.stringify({
-            "image": image
-        });
-        sendMessage('/chatRoom', {}, data);
-    }
-
-    /**
-     * 消息通知
-     * @param data
-     */
-
-
-    function msgNotice(data) {
-        // 已开启通知且窗口不可见才进行消息通知
-        if (openNotice && !visible) {
-            // 通过标题通知
-            msgNoticeByTitle();
-            // 通过浏览器的消息通知支持进行通知
-            // msgNoticeByBrowser(data);
-        }
-    }
-
-    function msgNoticeByTitle() {
-        if (!openNotice || visible) {
-            // 未开启通知或窗口可见，不进行提醒
-            return;
-        }
-
-        if (opendSound) {
-            // 提示音
-            beep();
-        }
-        // 窗口不可见显示提醒
-        document.title = '有新消息啦！！！';
-    }
-    /**
-     * 播放提示音
-     */
-    function beep() {
-        var beep = document.getElementById('beep');
-        beep.play();
-    }
-
-</script>
 <body>
 <div class="main">
 	<div class="page-pre-enter">
@@ -387,26 +30,26 @@
 		</div>
 		<div class="room-container">
 			<ul class="room-ul">
-				<li class="con-li flex-row">
+				<!--<li class="con-li flex-row">
 					<img src="images/avator.png" class="li-avator" >
 					<div class="li-info">
 						<div class="info-name">收银员</div>
 						<div class="li-content">在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户</div>
 					</div>
 				</li>
-				<!-- 判断下用户名，如果消息用户等于当前缓存用户customName，就加上 user-li，顺便换个头像 -->
+				&lt;!&ndash; 判断下用户名，如果消息用户等于当前缓存用户customName，就加上 user-li，顺便换个头像 &ndash;&gt;
 				<li class="con-li flex-row user-li">
 					<div class="li-info">
 						<div class="info-name">收银员</div>
 						<div class="li-content">在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户</div>
 					</div>
 					<img src="images/avator.png" class="li-avator" >
-				</li>
+				</li>-->
 			</ul>
 		</div>
 		<!-- <div style="height: 1.4rem;background: white;"></div> -->
 		<div class="chat-bot flex-row">
-			<input type="text" class="bot-input" />
+			<input type="text" class="bot-input" id="msg-need-send" />
 			<div class="bot-btn menu-add"></div>
 			<div class="bot-btn" onclick="sendMsg('group')"></div>
 			<div class="menu-layer">
@@ -429,7 +72,7 @@
 	</div>
 	
 	
-    <div class="onLineUser">
+    <!--<div class="onLineUser">
         <p>在线用户：</p>
         <ol id="olUser">
         </ol>
@@ -437,7 +80,7 @@
     <div>
         <p>【我是】： <input id="userId" name="userId" type="text" value="收银员">
         <p>【发送给】： <select style="width: 130px" id="toUserId"></select>
-<!--        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="东湖门店组">-->
+&lt;!&ndash;        <p>【发送到群】： <input id="toGroupId" name="toGroupId" type="text" value="东湖门店组">&ndash;&gt;
         <p>【操作】：<button id="openSocket" onclick="connect()">开启socket通讯</button>
     </div>
     <div class="receive">
@@ -445,77 +88,17 @@
         <div id="receive-box"></div>
     </div>
     <div class="send">
-        <textarea type="text" id="msg-need-send"></textarea>
-<!--        <div id="picture_btn" onclick="selectFile()" style="width: 20px; height: 20px; background-image: url('https://cdn.v2ex.com/gravatar/9f54b31715de284368159c22b6ee1d6b?s=73&d=retro')"></div>-->
-        <input type="file" style="display: none" id="file" onchange="sendImage()"/>
+&lt;!&ndash;        <textarea type="text" id="msg-need-send"></textarea>&ndash;&gt;
+&lt;!&ndash;        <div id="picture_btn" onclick="selectFile()" style="width: 20px; height: 20px; background-image: url('https://cdn.v2ex.com/gravatar/9f54b31715de284368159c22b6ee1d6b?s=73&d=retro')"></div>&ndash;&gt;
+&lt;!&ndash;        <input type="file" style="display: none" id="file" onchange="sendImage()"/>&ndash;&gt;
         <p>
             <svg onclick="selectFile()" class="icon" style="width: 3em; height: 3em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="500"><path d="M824.3 259.1H480.2c1.5 0 2.3-7.5 2.3-11.8 0-18.8-15.3-33.7-34.1-33.7H289.2c-18.8 0-34.1 14.9-34.1 33.7 0 4.3 0.9 11.8 2.3 11.8h-40.9c-20 0-34.5 11.8-34.5 35.6V651c0 17.5 15.7 32.6 33.3 32.6h610.2c17.6 0 31.3-15.1 38.8-32.6V294.7c0.1-19.4-20-35.6-40-35.6z" fill="#77CAF7" p-id="501"></path><path d="M825.5 698.8H217.2c-8.4 0-15.2-6.8-15.2-15.2 0-8.4 6.8-15.2 15.2-15.2h608.3c10.3 0 16.1-9.6 23.7-18.3v-272c0-8.4 6.8-15.2 15.2-15.2 8.4 0 15.2 6.8 15.2 15.2V651c0 0.5-1.4 2.1-1.4 2.5-2.4 24.8-26.2 45.3-52.7 45.3zM182.1 416c-8.4 0-15.2-6.8-15.2-15.2V294.7c0-30.3 19.8-50.7 49.7-50.7H240c1.8-30.3 23.1-45.5 49.2-45.5h159.2c26 0 47.4 15.2 49.2 45.5h326.7c27.9 0 55.2 22.5 55.2 50.7v15.2c0 8.4-6.8 15.2-15.2 15.2-8.4 0-15.2-6.8-15.2-15.2v-15.2c0-11.5-13.7-20.4-24.9-20.4h-344c-8.4 0-15.2-7.9-15.2-16.3 0-2.8 0.7-5.9 2-8.2 0.2-1.2 0.3-2 0.3-3.3 0-10.4-8.3-17.7-19-17.7H289.2c-10.6 0-19 7-19 17.4 0 1.3 0.1 2.4 0.3 3.6 1.3 2.2 2 5.7 2 8.5 0 8.4-6.8 16-15.2 16h-40.9c-10.2 0-19.4 3.6-19.4 20.4v106.1c0.2 8.4-6.6 15.2-14.9 15.2z m296.8-174.3z m-220.1 0z m221.1 0c-0.4 0-0.7 0-1.1 0.1 0.4-0.1 0.8-0.1 1.1-0.1z m-222.2 0c0.4 0 0.7 0 1.1 0.1-0.4-0.1-0.8-0.1-1.1-0.1zM480 244z m-222.4 0z m222.4 0z m-222.4 0z m-0.1 0s0.1 0 0 0c0.1 0 0.1 0 0 0z m222.6 0z m-222.6-2.3z m222.6 0z m0.1 0z m-222.7 0z" fill="#5E125C" p-id="502"></path><path d="M790.2 544.9H247.9c-8.6 0-15.5-7-15.5-15.5V317.9c0-8.6 7-15.5 15.5-15.5h542.3c10.1 0 18.3 8.2 18.3 18.3v206c0 10-8.2 18.2-18.3 18.2z" fill="#F8F9FB" p-id="503"></path><path d="M790.2 560.1H247.9c-16.9 0-30.7-13.8-30.7-30.7V317.9c0-16.9 13.8-30.7 30.7-30.7h542.3c18.5 0 33.5 15 33.5 33.5v206c0 18.3-15 33.4-33.5 33.4zM247.9 317.5l-0.4 211.9 542.7 0.4c1.7 0 3.2-1.4 3.2-3.2v-206c0-1.7-1.4-3.2-3.2-3.2H247.9z" fill="#5E125C" p-id="504"></path><path d="M791.5 802.7H249.3c-31.1 0-57.1-23.7-59.9-54.7l-27-319.5c-3.2-35.2 24.5-65.6 59.9-65.6h596.1c35.4 0 63.1 30.4 59.9 65.6l-27 319.5c-2.7 31-28.7 54.7-59.8 54.7z" fill="#77CAF7" p-id="505"></path><path d="M818.5 365.3h-18.7l-28.9 340.6c-1.2 13.2-12.3 23.3-25.5 23.3H187.5l1.9 21.1c2.8 31 28.8 54.7 59.9 54.7h542.2c31.1 0 57.1-24.9 59.9-55.8l27-320c2-21.9-8-41.1-24.4-53.1-9.9-7.4-22.2-10.8-35.5-10.8z" fill="#5EA8FF" opacity=".29" p-id="506"></path><path d="M681.3 372.9H223.1c-19.4 0-33.9 2.7-44.5 10.2-11.3 12-17.7 28.1-16.1 46l27 319.2c2.3 25.1 19.8 45.4 43 52.1 152.9-143.7 305.2-283.6 452.1-428.5-1.1 0-2.2 1-3.3 1z" fill="#FFFFFF" opacity=".1" p-id="507"></path><path d="M174.8 590.4c-7.8 0-14.4-6-15.1-13.9l-1.9-22.7c-0.7-8.3 5.5-15.7 13.8-16.4 8.3-0.7 15.7 5.5 16.4 13.8l1.9 22.7c0.7 8.3-5.5 15.7-13.8 16.4-0.5 0.1-0.9 0.1-1.3 0.1z" fill="#5E125C" p-id="508"></path><path d="M787.2 817.8H253.6c-41.6 0-75.9-31.3-79.7-72.7l-9.8-115.5c-0.7-8.3 5.5-15.7 13.8-16.4 8.3-0.7 15.7 5.5 16.4 13.8l9.8 115.4c2.3 25.7 23.6 45.1 49.4 45.1h533.6c25.9 0 47.1-19.4 49.5-45.2l29.2-343.5c0.5-5.4-1.2-10.6-4.9-14.5-3.6-4-8.6-6.2-13.9-6.2H193.8c-5.4 0-10.3 2.2-13.9 6.2-3.6 4-5.4 9.1-4.9 14.5l7.8 99.5c0.7 8.3-5.6 15.6-13.9 16.3-8.5 0.6-15.7-5.6-16.3-13.9l-7.8-99.3c-1.2-13.5 3.4-27.3 12.7-37.5 9.3-10.2 22.6-16 36.3-16H847c13.8 0 27 5.8 36.3 16 9.3 10.2 13.9 23.9 12.7 37.6L866.9 745c-3.8 41.6-38 72.8-79.7 72.8z" fill="#5E125C" p-id="509"></path></svg>
             <button class="sendBtn" id="send-btn" onclick="sendMsg('user')">推送个人消息</button>
             <button class="sendBtn" id="send-group-btn" onclick="sendMsg('group')">推送全局消息</button>
         </p>
     </div>
-    <button id="exit" onclick="disConnect()">关闭连接</button>
+    <button id="exit" onclick="disConnect()">关闭连接</button>-->
 </div>
 <audio id="beep" src="./sounds/qq.mp3"></audio>
-	
-	<script>
-		// for(let i =0;i<10;i++){
-		// 	$('.room-ul').append('<li class="con-li flex-row">'+
-		// 				'<img src="images/avator.png" class="li-avator" >'+
-		// 				'<div class="li-info">'+
-		// 					'<div class="info-name">收银员</div>'+
-		// 					'<div class="li-content">在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户在线用户</div>'+
-		// 				'</div>'+
-		// 			'</li>')
-		// }
-		
-		function hideMask(){
-			$('.mask').hide()
-			$('.online-layer').removeClass('show-layer')
-		}
-		
-		$('.room-head .head-msg').on('click',function(){
-			$('.mask').show()
-			$('.online-layer').addClass('show-layer')
-		})
-		
-		$('.menu-add').on('click',function(){
-			$('.chat-bot .menu-layer').toggleClass('show-layer')
-		})
-		
-		$('.enter-sec .sec-btn').on('click',function(){
-			const customName = $('.enter-sec .sec-input').val()
-			if(customName === ''){
-				return
-			}else{
-				let userList = window.localStorage.getItem('userList')
-				if(userList != null){
-					userList = JSON.parse(userList)
-					if(userList.length > 0){
-						const checkUser = () =>{
-							for(let i in userList){
-								if(userList[i].name === customName){
-									return true
-								}
-								return false
-							}
-						}
-						if(!checkUser()){
-							userList.push({
-								id: userList.length+1,
-								name: customName
-							})
-						}
-					}
-				}else{
-					userList = [ {id:1, name:customName}]
-				}
-				window.localStorage.setItem('userList',JSON.stringify(userList))
-				window.localStorage.setItem('customName',JSON.stringify(customName))
-				$(".page-pre-enter").addClass('hide-enter')
-				connect()
-			}
-		})
-	</script>
 </body>
 </html>

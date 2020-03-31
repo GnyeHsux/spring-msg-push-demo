@@ -21,9 +21,9 @@ ul{list-style: none;}
 .mask{position: fixed;top:0;right:0;bottom:0;left:0;background: rgba(0,0,0,.5);z-index:16;display: none;}
 .mask-white{position: fixed;top:0;right:0;bottom:0;left:0;z-index:10;}
 
-.page-pre-enter{position: fixed;top: 0;left: 0;width: 100%;height: 100vh;z-index: 1000;display: none;}
+.page-pre-enter{position: fixed;top: 0;left: 0;width: 100%;height: 100vh;z-index: 1000;}
 .page-pre-enter.hide-enter{transition: all ease 3s;transform: translate(0, -200%)}
-.page-pre-enter .enter-bg{background: url(images/bg.jpg);filter: blur(4px); background-size: cover;width: 100%;height: 100%;position: relative;z-index: 1001; top: 0;left: 0;}
+.page-pre-enter .enter-bg{background: url(../images/bg.jpg);filter: blur(4px); background-size: cover;width: 100%;height: 100%;position: relative;z-index: 1001; top: 0;left: 0;}
 .page-pre-enter .enter-sec{width: 60%;flex-direction: column;position: absolute;top: 30%;left: 20%;z-index: 1002;padding: 0 .2rem;}
 .page-pre-enter .enter-sec .sec-input{border: none;display: block;width: 100%;height: .6rem;border-radius: .2rem;font-size: .26rem;color: #333333;text-align: center;padding: 0 .1rem;box-sizing: border-box;}
 .page-pre-enter .enter-sec .sec-btn{width: 100%;line-height: .8rem;text-align: center;border-radius: .2rem;background: black;font-size: .3rem;color: white;margin-top: .6rem;}
@@ -46,15 +46,15 @@ ul{list-style: none;}
 
 .chat-bot{position: fixed;bottom: .4rem;left: 0;width: 100%;padding: 0 .2rem;box-sizing: border-box;z-index: 15;font-size: .3rem;color: #333333;}
 .chat-bot .bot-input{display: block;border: none;background: white;border-radius: .3rem;padding: 0 .3rem;box-sizing: border-box;flex: 1;height: .8rem;box-shadow:0 .08rem .4rem 0 rgba(0,0,0,0.08);z-index: 3;}
-.chat-bot .bot-btn{width: .6rem;height: .6rem;background: url(images/send_icon.png) no-repeat center center;background-size: contain;margin-left: .3rem;}
-.chat-bot .bot-btn.menu-add{background-image: url(images/menu_add.png);}
+.chat-bot .bot-btn{width: .6rem;height: .6rem;background: url(../images/send_icon.png) no-repeat center center;background-size: contain;margin-left: .3rem;}
+.chat-bot .bot-btn.menu-add{background-image: url(../images/menu_add.png);}
 .chat-bot .menu-layer{position: absolute;bottom: 1rem;right: .5rem;width: 2rem;background: white;box-shadow:0 .08rem .4rem 0 rgba(0,0,0,0.08);border-radius: .14rem;transform: scale(0,0);transition: all ease 300ms;}
 .chat-bot .menu-layer.show-layer{transform: scale(1,1);transition: all ease 500ms;}
 .chat-bot .menu-layer .con-menu{width: 100%;line-height: .8rem;text-align: center;font-size: .3rem;color: #333333;display: block;}
 
 .online-layer{position: fixed;top: 0;left: 0;width: 60%;height: 100%;background: white;z-index: 16;transform: translate(-100%,0);transition: all ease 300ms;}
 .online-layer.show-layer{transform: translate(0,0);transition: all ease 500ms;}
-.online-layer .line-head{height: 1.6rem;box-sizing: border-box;padding: .4rem;font-size: .4rem;color: white; background: url(images/bg.jpg) no-repeat center center;background-size: cover;}
+.online-layer .line-head{height: 1.6rem;box-sizing: border-box;padding: .4rem;font-size: .4rem;color: white; background: url(../images/bg.jpg) no-repeat center center;background-size: cover;}
 .online-layer .line-ul{display: block;height: 80%;overflow-y: scroll;overflow-x: hidden;}
 .online-layer .line-li{min-height: .9rem;padding: .3rem;text-align: center;font-size: .3rem;color: #333333;box-sizing: border-box;display: block;}
 
