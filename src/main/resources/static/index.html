@@ -2,9 +2,10 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
     <title>Websocket Demo</title>
-	<link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/common.css">
     <script src="js/jquery.js"></script>
     <script src="js/sockjs.min.js"></script>
     <script src="js/stomp.min.js"></script>
@@ -14,47 +15,47 @@
 </head>
 <body>
 <div class="main">
-	<div class="page-pre-enter">
-		<div class="enter-bg"></div>
-		<div class="enter-sec flex-row">
-			<!-- todo 加个头像 -->
-			<input type="text" placeholder="请输入您的昵称" id="userName" class="sec-input" />
-			<input type="hidden" id="avatorUrl"/>
-			<div class="sec-btn">进入聊天室</div>
-		</div>
-	</div>
-	
-	<div class="chat-room">
-		<div class="room-head">
-			<img src="images/msg_icon.png" class="head-msg">
-			<span>凉瓜铺</span>
-			<div class="head-bot">···</div>
-		</div>
-		<div class="room-container" id="room-container">
-			<ul class="room-ul" id="room-ul">
-			</ul>
-		</div>
-		<!-- <div style="height: 1.4rem;background: white;"></div> -->
-		<div class="chat-bot flex-row">
-			<input type="text" class="bot-input" id="msg-need-send" />
-			<div class="bot-btn menu-add"></div>
-			<div class="bot-btn" onclick="sendMsg('group')"></div>
-			<div class="menu-layer">
-				<div class="con-menu"></div>
-				<label for="file" class="con-menu">
-					<span>图片</span>
-					<input type="file" accept="image/*" style="display: none" id="file" onchange="sendImage('file')"/>
-				</label>
-			</div>
-		</div>
-		
-		<div class="mask" onclick="hideMask()"></div>
-		<div class="online-layer">
-			<div class="line-head">当前在线用户</div>
-			<ul class="line-ul">
-			</ul>
-		</div>
-	</div>
+    <div class="page-pre-enter">
+        <div class="enter-bg"></div>
+        <div class="enter-sec flex-row">
+            <img src="images/avator.png" style="width: 1.2rem; height: 1.2rem; display: block; border-radius: 50%; margin-bottom: .2rem" id="avatar" onclick="selectFile('avatorFile')">
+            <input type="file" style="display: none" id="avatorFile" onchange="sendImage('avatorFile')"/>
+            <input type="text" placeholder="请输入您的昵称" id="userName" class="sec-input"/>
+            <div class="sec-btn">进入聊天室</div>
+        </div>
+    </div>
+
+    <div class="chat-room">
+        <div class="room-head">
+            <img src="images/msg_icon.png" class="head-msg">
+            <span>凉瓜铺</span>
+            <div class="head-bot">···</div>
+        </div>
+        <div class="room-container" id="room-container">
+            <ul class="room-ul" id="room-ul">
+            </ul>
+        </div>
+        <!-- <div style="height: 1.4rem;background: white;"></div> -->
+        <div class="chat-bot flex-row">
+            <input type="text" class="bot-input" id="msg-need-send"/>
+            <div class="bot-btn menu-add"></div>
+            <div class="bot-btn" onclick="sendMsg('group')"></div>
+            <div class="menu-layer">
+                <div class="con-menu"></div>
+                <label for="file" class="con-menu">
+                    <span>图片</span>
+                    <input type="file" accept="image/*" style="display: none" id="file" onchange="sendImage('file')"/>
+                </label>
+            </div>
+        </div>
+
+        <div class="mask" onclick="hideMask()"></div>
+        <div class="online-layer">
+            <div class="line-head">当前在线用户</div>
+            <ul class="line-ul">
+            </ul>
+        </div>
+    </div>
 </div>
 <audio id="beep" src="./sounds/qq.mp3"></audio>
 </body>

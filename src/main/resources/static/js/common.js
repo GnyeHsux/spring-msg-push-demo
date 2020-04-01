@@ -15,6 +15,7 @@ var uid = null;
 window.onload = function () {
     var userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
     $('#userName').val(userInfo.username);
+    $("#avatar").attr("src", userInfo.avatar);
     uid = userInfo.userId;
 
     // 监听窗口切换
@@ -54,7 +55,7 @@ function connect() {
 
     var user = {
         'username': username,
-        'avatar': 'https://whycode.icu/user.jpeg',
+        'avatar': $("#avatar")[0].src,
         'address': "地球村"
     };
     stompClient.connect(user, function (frame) {
@@ -140,9 +141,9 @@ function showUserMsg(data) {
     }
     if (uid === data.user.userId) {
         data.user.username = '我';
-        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="images/avator.png" class="li-avator" ></li>`;
+        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
     } else {
-        msg = `<li class="con-li flex-row"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
+        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
 
     showMsg(msg);
@@ -293,8 +294,8 @@ function getUserIdByName(name) {
 /**
  * 选择文件
  */
-function selectFile() {
-    $('#file').click();
+function selectFile(id) {
+    $('#' + id).click();
 }
 
 function sendImage(id) {
@@ -334,7 +335,8 @@ function sendImage(id) {
                 if (id === 'file') {
                     sendImageToChatRoom(rep.path);
                 } else {
-                    // todo 设置头像
+                    $("#avatar").attr("src", rep.path);
+
                 }
                 $("#" + id).val('');
             }
@@ -356,8 +358,6 @@ function sendImageToChatRoom(image) {
  * 消息通知
  * @param data
  */
-
-
 function msgNotice(data) {
     // 已开启通知且窗口不可见才进行消息通知
     if (openNotice && !visible) {
