@@ -102,31 +102,7 @@ function connect() {
         //订阅聊天室的消息
         stompClient.subscribe('/topic/chatRoom', function (data) {
             data = JSON.parse(data.body).data;
-            var liStyle = '';
-            if (uid === data.user.userId) {
-                data.user.username = '我';
-                openNotice = false;
-                liStyle = 'user-li';
-            }
-            openNotice = true;
-            if (data.type == 'REVOKE') {
-                var obj = document.getElementById(data.revokeMessageId);
-                obj.remove();
-                var msg = `<li class="con-li flex-row ${liStyle}"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content">${data.user.username + '撤回了一条消息！'}<</div></div></li>`;
-                showMsg(msg)
-            } else {
-                var msg = null;
-                if (data.image == null) {
-                    msg = `<li class="con-li flex-row ${liStyle}"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content">${data.message}</div></div></li>`;
-                } else {
-                    msg = `<div ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}" class="show_image"><img style="height: 5em" src="${data.image}"/></div>`;
-                }
-                showMsg(msg);
-            }
-
-
-            // 消息通知
-            msgNotice(data);
+            handleMessage(data);
         });
 
         // 错误信息订阅
@@ -139,6 +115,61 @@ function connect() {
         }
     });
 
+}
+
+/**
+ * 处理消息
+ * @param data
+ */
+function handleMessage(data) {
+    var msg = data.message;
+    switch (data.type) {
+        case 'USER':
+            showUserMsg(data);
+            break;
+        case 'SYSTEM':
+            showSystemMsg(msg);
+            break;
+        case 'REVOKE':
+            showRevokeMsg(data);
+            break;
+        case 'ROBOT':
+            showRobotMsg(data);
+            break;
+        default:
+            break;
+    }
+
+    // 消息通知
+    msgNotice(data);
+}
+
+function showUserMsg(data) {
+    var msg = null;
+    var content = data.message;
+    if (data.image != null) {
+        content = `<img style="height: 5rem" src="${data.image}"/>`
+    }
+    if (uid === data.user.userId) {
+        data.user.username = '我';
+        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="images/avator.png" class="li-avator" ></li>`;
+    } else {
+        msg = `<li class="con-li flex-row"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
+    }
+
+    showMsg(msg);
+}
+
+function showRevokeMsg(data) {
+    var liStyle = '';
+    if (uid === data.user.userId) {
+        data.user.username = '我';
+        liStyle = 'user-li';
+    }
+    var obj = document.getElementById(data.revokeMessageId);
+    obj.remove();
+    var msg = `<li class="con-li flex-row ${liStyle}"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content">${data.user.username + '撤回了一条消息！'}<</div></div></li>`;
+    showMsg(msg)
 }
 
 /**
@@ -171,11 +202,12 @@ function codeMapping(date) {
 
 function flushOnlineGroup(data) {
     onlineUserList = data.onlineUserList;
+    console.log(onlineUserList);
 
-    $(".line-ul").empty();
+    $(".online-layer .line-ul").empty();
     for (index in onlineUserList) {
         if (onlineUserList[index].userId != uid) {
-            $(".line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
+            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
         }
     }
 }
@@ -384,9 +416,8 @@ $(document).ready(function () {
     })
 
     $('.enter-sec .sec-btn').on('click', function () {
-        const customName = $('.enter-sec .sec-input').val()
-        console.log(customName)
-        if (customName === '') {
+        username = $('.enter-sec .sec-input').val();
+        if (username === '') {
             return
         } else {
             let userList = window.localStorage.getItem('userList')
@@ -395,7 +426,7 @@ $(document).ready(function () {
                 if (userList.length > 0) {
                     const checkUser = () => {
                         for (let i in userList) {
-                            if (userList[i].name === customName) {
+                            if (userList[i].name === username) {
                                 return true
                             }
                             return false
@@ -404,15 +435,15 @@ $(document).ready(function () {
                     if (!checkUser()) {
                         userList.push({
                             id: userList.length + 1,
-                            name: customName
+                            name: username
                         })
                     }
                 }
             } else {
-                userList = [{id: 1, name: customName}]
+                userList = [{id: 1, name: username}]
             }
             window.localStorage.setItem('userList', JSON.stringify(userList))
-            window.localStorage.setItem('customName', JSON.stringify(customName))
+            window.localStorage.setItem('customName', JSON.stringify(username))
             $(".page-pre-enter").addClass('hide-enter')
             connect()
         }
