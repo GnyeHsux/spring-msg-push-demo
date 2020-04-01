@@ -28,6 +28,14 @@ window.onload = function () {
             document.title = title;
         }
     });
+
+    // 页面加载完成监听回车事件
+    document.getElementById("msg-need-send").addEventListener("keydown", function (e) {
+        if (e.keyCode != 13) return;
+        e.preventDefault();
+        // 发送信息
+        sendMsg('group');
+    });
 }
 
 // var vConsole = new VConsole();
