@@ -182,11 +182,12 @@ function flushOnlineGroup(data) {
     console.log(onlineUserList);
 
     $(".online-layer .line-ul").empty();
-    for (index in onlineUserList) {
-        if (onlineUserList[index].userId == uid) {
+    for (let index in onlineUserList) {
+        if (onlineUserList[index].userId === uid) {
             $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">我</li>`)
+        } else {
+            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
         }
-        $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
     }
 }
 
