@@ -11,10 +11,6 @@ var username = '';
 
 window.onload = function () {
 
-    // username = prompt("请问，你哪位？");
-    // connect();
-
-
     // 监听窗口切换
     document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "hidden") {
@@ -42,11 +38,6 @@ function connect() {
     // 客户端不接收服务器的心跳检测
     stompClient.heartbeat.incoming = 0;
 
-    if ($("#userId").val() == '') {
-        alert("你是谁？");
-        return;
-    }
-
     var user = {
         'username': username,
         'avatar': 'https://whycode.icu/user.jpeg',
@@ -73,30 +64,7 @@ function connect() {
         //订阅发给自己的消息
         stompClient.subscribe('/user/' + uid + '/chat', function (data) {
             data = JSON.parse(data.body).data;
-            var liStyle = '';
-            if (uid === data.user.userId) {
-                data.user.username = '我';
-                openNotice = false;
-                liStyle = 'user-li';
-            }
-            openNotice = true;
-            var msg = '';
-            if (data.type == 'REVOKE') {
-                var obj = document.getElementById(data.revokeMessageId);
-                obj.remove();
-                msg = `<li class="con-li flex-row ${liStyle}"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content">${data.user.username + '撤回了一条消息！'}<</div></div></li>`;
-            } else {
-                if (data.image == null) {
-                    msg = `<li class="con-li flex-row ${liStyle}"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content">${data.message}</div></div></li>`;
-                    msg = `<p style="color: black" ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}">${data.user.username + ": " + data.message}</p>`;
-                } else {
-                    msg = `<div ondblclick="revokeMsg(this)" receiver="${data.receiver}" id="${data.messageId}" class="show_image"><img style="height: 5em" src="${data.image}"/></div>`;
-                }
-            }
-            showMsg(msg);
-
-            // 消息通知
-            msgNotice(data);
+            handleMessage(data);
         });
 
         //订阅聊天室的消息
@@ -152,7 +120,7 @@ function showUserMsg(data) {
     }
     if (uid === data.user.userId) {
         data.user.username = '我';
-        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="images/avator.png" class="li-avator" ></li>`;
+        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="images/avator.png" class="li-avator" ></li>`;
     } else {
         msg = `<li class="con-li flex-row"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
@@ -199,9 +167,10 @@ function flushOnlineGroup(data) {
 
     $(".online-layer .line-ul").empty();
     for (index in onlineUserList) {
-        if (onlineUserList[index].userId != uid) {
-            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
+        if (onlineUserList[index].userId == uid) {
+            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">我</li>`)
         }
+        $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
     }
 }
 
@@ -307,8 +276,8 @@ function selectFile() {
     $('#file').click();
 }
 
-function sendImage() {
-    var image = $("#file").val();
+function sendImage(id) {
+    var image = $("#" + id).val();
     if (image === '' || image === undefined) {
         return;
     }
@@ -316,7 +285,7 @@ function sendImage() {
     var filename = image.replace(/.*(\/|\\)/, "");
     var fileExt = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename.toUpperCase()) : '';
 
-    var file = $('#file').get(0).files[0];
+    var file = $('#' + id).get(0).files[0];
     var fileSize = file.size;
     var mb = 30;
     var maxSize = mb * 1024 * 1024;
@@ -341,8 +310,12 @@ function sendImage() {
             success: function (data) {
                 codeMapping(data);
                 var rep = data.data;
-                sendImageToChatRoom(rep.path);
-                // console.log(data.data);
+                if (id === 'file') {
+                    sendImageToChatRoom(rep.path);
+                } else {
+                    // todo 设置头像
+                }
+                $("#" + id).val('');
             }
         });
     }
