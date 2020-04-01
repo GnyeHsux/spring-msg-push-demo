@@ -71,8 +71,7 @@ function connect() {
         //订阅用户状态
         stompClient.subscribe('/topic/status', function (data) {
             data = JSON.parse(data.body).data;
-            var msg = `<li style="color: orangered; font-size: 0.22rem">${"系统消息: " + data.message}</li>`;
-            showMsg(msg);
+            handleMessage(data);
             //刷新在线列表
             flushOnlineGroup(data);
         });
@@ -126,6 +125,11 @@ function handleMessage(data) {
 
     // 消息通知
     msgNotice(data);
+}
+
+function showSystemMsg(msg) {
+    var msg = `<li style="color: #999; font-size: 0.22rem; text-align: center">${"系统消息: " + msg}</li>`;
+    showMsg(msg);
 }
 
 function showUserMsg(data) {
