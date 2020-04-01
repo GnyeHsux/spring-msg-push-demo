@@ -3,6 +3,7 @@ package com.shiji.springdwrdemo.stomp.domain.mo;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 import java.security.Principal;
@@ -23,6 +24,7 @@ public class User implements Principal, Serializable {
     /**
      * 用户id
      */
+    @Id
     private String userId;
     /**
      * 用户昵称

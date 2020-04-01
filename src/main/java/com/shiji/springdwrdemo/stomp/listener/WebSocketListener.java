@@ -1,5 +1,6 @@
 package com.shiji.springdwrdemo.stomp.listener;
 
+import com.shiji.springdwrdemo.dao.UserRepository;
 import com.shiji.springdwrdemo.stomp.cache.UserCache;
 import com.shiji.springdwrdemo.stomp.constant.MessageConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
@@ -9,6 +10,7 @@ import com.shiji.springdwrdemo.stomp.domain.vo.DynamicMsgVo;
 import com.shiji.springdwrdemo.stomp.domain.vo.MessageVO;
 import com.shiji.springdwrdemo.stomp.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -25,6 +27,9 @@ public class WebSocketListener {
 
     @Resource
     private MessageService messageService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private User user;
 
@@ -51,6 +56,7 @@ public class WebSocketListener {
         }
 
         user.setStatus(UserStatusConstant.OFFLINE);
+        userRepository.save(user);
         UserCache.removeUser(userId);
 
         // 广播离线消息

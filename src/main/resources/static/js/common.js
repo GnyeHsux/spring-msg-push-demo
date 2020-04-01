@@ -7,9 +7,15 @@ var visible = true;
 var opendSound = true;
 
 var title = document.title;
+// 用户名
 var username = '';
+// 用户id
+var uid = null;
 
 window.onload = function () {
+    var userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
+    $('#userName').val(userInfo.username);
+    uid = userInfo.userId;
 
     // 监听窗口切换
     document.addEventListener("visibilitychange", function () {
@@ -47,6 +53,8 @@ function connect() {
         $('#openSocket').attr("disabled", true);
         console.log('Connected: ' + frame);
         uid = frame.headers['user-name'];
+        user.userId = uid;
+        window.localStorage.setItem("userInfo", JSON.stringify(user));
 
         if (uid === undefined) {
             alert("建立连接失败，请重新连接！");
