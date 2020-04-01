@@ -148,11 +148,11 @@ function showUserMsg(data) {
     var msg = null;
     var content = data.message;
     if (data.image != null) {
-        content = `<img style="height: 5rem" src="${data.image}"/>`
+        content = `<img style="width: 5rem" src="${data.image}"/>`
     }
     if (uid === data.user.userId) {
         data.user.username = '我';
-        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="images/avator.png" class="li-avator" ></li>`;
+        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="images/avator.png" class="li-avator" ></li>`;
     } else {
         msg = `<li class="con-li flex-row"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
@@ -161,15 +161,8 @@ function showUserMsg(data) {
 }
 
 function showRevokeMsg(data) {
-    var liStyle = '';
-    if (uid === data.user.userId) {
-        data.user.username = '我';
-        liStyle = 'user-li';
-    }
     var obj = document.getElementById(data.revokeMessageId);
-    obj.remove();
-    var msg = `<li class="con-li flex-row ${liStyle}"><img src="images/avator.png" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content">${data.user.username + '撤回了一条消息！'}<</div></div></li>`;
-    showMsg(msg)
+    obj.innerHTML = "<span style='color: gray'>已撤回...</span>";
 }
 
 /**
@@ -212,6 +205,14 @@ function flushOnlineGroup(data) {
     }
 }
 
+/**
+ * 跳到聊天界面最底下
+ */
+function jumpToLow() {
+    // todo ！！！志熊修复下滚动到最后一行！！！
+    $(".room-ul").scrollTop($(".room-ul li:last-child").scrollHeight);
+}
+
 function disConnect() {
     // 客户端主动关闭连接
     if (stompClient !== null) {
@@ -221,13 +222,8 @@ function disConnect() {
 }
 
 function showMsg(data) {
-    /*var receiveBox = document.getElementsByClassName("room-ul");
-    receiveBox.innerHTML += `${data}`
-    receiveBox.scrollTo({
-        top: receiveBox.scrollHeight,
-        behavior: "smooth"
-    })*/
-    $('.room-ul').append(data)
+    $('.room-ul').append(data);
+    jumpToLow();
 }
 
 function sendMsg(type) {
