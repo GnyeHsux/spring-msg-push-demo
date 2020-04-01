@@ -209,8 +209,12 @@ function flushOnlineGroup(data) {
  * 跳到聊天界面最底下
  */
 function jumpToLow() {
-    // todo ！！！志熊修复下滚动到最后一行！！！
-    $(".room-ul").scrollTop($(".room-ul li:last-child").scrollHeight);
+    var roomUl = document.getElementById("room-ul");
+    var roomContainer = document.getElementById("room-container");
+    roomContainer.scrollTo({
+        top: roomUl.scrollHeight,
+        behavior: "smooth"
+    })
 }
 
 function disConnect() {
@@ -412,7 +416,7 @@ $(document).ready(function () {
     })
 
     $('.enter-sec .sec-btn').on('click', function () {
-        username = $('.enter-sec .sec-input').val();
+        username = $('.enter-sec .sec-input').val().trim();
         if (username === '') {
             return
         } else {
