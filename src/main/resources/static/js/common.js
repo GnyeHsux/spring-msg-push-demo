@@ -14,9 +14,11 @@ let uid = null;
 
 window.onload = function () {
     let userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
-    $('#userName').val(userInfo.username);
-    $("#avatar").attr("src", userInfo.avatar);
-    uid = userInfo.userId;
+    if (userInfo !== null) {
+        $('#userName').val(userInfo.username);
+        $("#avatar").attr("src", userInfo.avatar);
+        uid = userInfo.userId;
+    }
 
     // 监听窗口切换
     document.addEventListener("visibilitychange", function () {
@@ -54,11 +56,13 @@ function connect() {
     stompClient.heartbeat.incoming = 0;
 
     let user = {
-        'userId' : uid,
         'username': username,
         'avatar': $("#avatar")[0].src,
         'address': "地球村"
     };
+    if (uid !== null) {
+        user.userId = uid;
+    }
     stompClient.connect(user, function (frame) {
         $('#openSocket').attr("disabled", true);
         console.log('Connected: ' + frame);

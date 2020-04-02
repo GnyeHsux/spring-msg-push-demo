@@ -52,30 +52,42 @@ public class WebSocketInterceptor implements ChannelInterceptor {
         if (StompCommand.CONNECT.equals(stompHeaderAccessor.getCommand())) {
             String userId = stompHeaderAccessor.getFirstNativeHeader("userId");
             String username = stompHeaderAccessor.getFirstNativeHeader("username");
+            String avatar = stompHeaderAccessor.getFirstNativeHeader("avatar");
+            String address = stompHeaderAccessor.getFirstNativeHeader("address");
 
             User user = new User();
-            if (StringUtils.isBlank(userId)) {
-                user.setUserId(UUIDUtils.create());
+            if (StringUtils.isEmpty(userId)) {
                 user.setUsername(username);
-                user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
-                user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
+                Optional<User> userRst = userRepository.findOne(Example.of(user));
+                if (userRst.isPresent()) {
+                    user.setUserId(userRst.get().getUserId());
+                } else {
+                    user.setUserId(UUIDUtils.create());
+                }
+                user.setUsername(username);
+                user.setAvatar(avatar);
+                user.setAddress(address);
                 user.setStatus(UserStatusConstant.ONLINE);
-                userRepository.insert(user);
+                if (userRst.isPresent()) {
+                    userRepository.save(user);
+                } else {
+                    userRepository.insert(user);
+                }
             } else {
                 user.setUserId(userId);
                 Optional<User> userRst = userRepository.findOne(Example.of(user));
                 if (userRst.isPresent()) {
                     user = userRst.get();
                     user.setUsername(username);
-                    user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
-                    user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
+                    user.setAvatar(avatar);
+                    user.setAddress(address);
                     user.setStatus(UserStatusConstant.ONLINE);
                     userRepository.save(user);
                 } else {
                     user.setUserId(UUIDUtils.create());
                     user.setUsername(username);
-                    user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
-                    user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
+                    user.setAvatar(avatar);
+                    user.setAddress(address);
                     user.setStatus(UserStatusConstant.ONLINE);
                     userRepository.insert(user);
                 }
