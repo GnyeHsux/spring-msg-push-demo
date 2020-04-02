@@ -437,12 +437,40 @@ function beep() {
 /*      志熊js代码          */
 
 
-function hideMask() {
-    $('.mask').hide()
-    $('.online-layer').removeClass('show-layer')
-}
-
 $(document).ready(function () {
+	
+	$('.room-ul .content-img').on('click',function(){	// 预览图片
+		const docEl = document.documentElement
+		let cwidth = docEl.clientWidth
+		let cheight = docEl.clientHeight
+		let imgObj = $(this).attr('src')
+		
+		$("<img/>").attr("src", imgObj).on('load',function(){
+			let imgW = this.width,imgH = this.height;
+			let preImg = $('.img-preview .pre-img')
+			if((cwidth/cheight) >= (imgW/imgH)){
+				preImg.css('width',(cheight*imgW)/imgH)
+				preImg.css('height',cheight)
+			} else{
+				preImg.css('width',cwidth)
+				preImg.css('height',(cwidth*imgH)/imgW)
+			}
+			
+			$('.img-preview .pre-img').attr('src',$(this).attr('src'))
+			$('.img-preview').show()
+		})
+	})
+	$('.img-preview').on('click',function(){
+		$(this).hide()
+	})
+	
+	
+	function hideMask() {
+	    $('.mask').hide()
+	    $('.online-layer').removeClass('show-layer')
+	}
+	
+	
     $('.room-head .head-msg').on('click', function () {
         $('.mask').show()
         $('.online-layer').addClass('show-layer')
