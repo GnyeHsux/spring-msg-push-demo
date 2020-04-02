@@ -185,7 +185,7 @@ function codeMapping(date) {
 function flushOnlineGroup(data) {
     onlineUserList = data.onlineUserList;
 
-    let userList = window.localStorage.getItem('userList');
+    let userList = window.localStorage.getItem('chatuserList');
     if (userList == null) {
         userList = [{id: uid, name: username}]
     } else {
@@ -213,7 +213,7 @@ function flushOnlineGroup(data) {
             user.name = onlineUserList[index].username;
         }
     }
-    window.localStorage.setItem('userList', JSON.stringify(userList))
+    window.localStorage.setItem('chatuserList', JSON.stringify(userList))
 }
 
 /**
@@ -317,7 +317,7 @@ function getUserIdByName(name) {
     if (name === '') {
         return '';
     }
-    let userList = window.localStorage.getItem('userList');
+    let userList = window.localStorage.getItem('chatuserList');
     userList = JSON.parse(userList);
 
     for (let i = 0; i < userList.length; i++) {
