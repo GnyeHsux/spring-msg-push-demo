@@ -143,7 +143,7 @@ function showUserMsg(data) {
     if (uid === data.user.userId) {
         msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name"><span style="margin-right: .1rem;">${data.sendTime}</span>${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
     } else {
-        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}<span aria-busy="margin-left: .1rem;">${data.sendTime}</span></div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
+        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}<span style="margin-left: .1rem;">${data.sendTime}</span></div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
 
     showMsg(msg);
