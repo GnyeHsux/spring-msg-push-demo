@@ -58,8 +58,9 @@ public class MessageRecord implements Serializable {
     public MessageVO toMessageVO() {
         MessageVO messageVO = new MessageVO();
         messageVO.setType(this.getMsgType());
-        messageVO.setMessageId(this.getMessageId());
-        messageVO.setSendTime(this.getSendTime());
+        messageVO.setRealMessageId(this.getMessageId());
+        messageVO.setRealSendTime(this.getSendTime());
+        messageVO.setOfflineMsg(true);
         BeanUtils.copyProperties(this, messageVO);
         return messageVO;
     }

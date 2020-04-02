@@ -67,6 +67,18 @@ public class MessageVO implements Serializable {
     @Setter
     private String[] receiver;
 
+    @Getter
+    @Setter
+    private String realSendTime;
+
+    @Getter
+    @Setter
+    private String realMessageId;
+
+    @Getter
+    @Setter
+    private Boolean offlineMsg = false;
+
     public MessageVO(User user, String message, String image, MessageTypeEnum type, String[] receiver) {
         this.user = user;
         this.message = message;

@@ -86,6 +86,19 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
+    @Override
+    public void sendOfflineMessageToUser(String[] receivers, MessageVO messageVO) throws Exception {
+        if (!CheckUtils.checkReceiver(receivers)) {
+            throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);
+        }
+
+        ResponseVO responseVO = buildResponseVo(messageVO);
+        for (String receiverId : receivers) {
+            // 将消息发送到指定用户 参数说明：1.消息接收者 2.消息订阅地址 3.消息内容
+            messagingTemplate.convertAndSendToUser(receiverId, StompConstant.SUB_USER, responseVO);
+        }
+    }
+
     private ResponseVO buildResponseVo(MessageVO messageVO) throws ErrorCodeException {
         if (messageVO == null) {
             throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);

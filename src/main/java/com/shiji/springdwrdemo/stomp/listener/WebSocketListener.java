@@ -136,7 +136,8 @@ public class WebSocketListener {
     }
 
     private void sendUserMessage(String receiver, MessageVO messageVO) throws Exception {
-        messageService.sendMessageToUser(new String[]{receiver}, messageVO);
+        log.info(messageVO.toString());
+        messageService.sendOfflineMessageToUser(new String[]{receiver}, messageVO);
     }
 
     /**

@@ -31,6 +31,15 @@ public interface MessageService {
     void sendMessageToUser(String[] receiver, MessageVO messageVO) throws Exception;
 
     /**
+     * 发送离线消息到指定用户
+     *
+     * @param receiver  消息接收者，是一个存入用户id的string数组
+     * @param messageVO 消息视图
+     * @throws Exception
+     */
+    void sendOfflineMessageToUser(String[] receiver, MessageVO messageVO) throws Exception;
+
+    /**
      * 发送错误消息
      *
      * @param code 错误码
