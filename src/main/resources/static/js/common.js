@@ -435,9 +435,41 @@ function beep() {
 
 
 /*      志熊js代码          */
-
+function hideMask() {
+	$('.mask').hide()
+	$('.online-layer').removeClass('show-layer')
+}
 
 $(document).ready(function () {
+	
+	var self = this;
+	var longClick =0;
+	$(".li-info .li-content").on({
+	    touchstart: e=>{
+			console.log($(e).text())
+			console.log('touchstart')
+	        longClick=0;//设置初始为0
+	        timeOutEvent = setTimeout(()=>{
+	            //此处为长按事件-----在此显执行撤销
+	            longClick=1;//假如长按，则设置为1
+				$(e).remove()
+	        },500);
+	    },
+	    touchmove: () =>{
+			console.log('touchmove')
+	        clearTimeout(timeOutEvent);
+	        timeOutEvent = 0;
+	        e.preventDefault();
+	    },
+	    touchend: e=>{
+			console.log('touchend')
+	        clearTimeout(timeOutEvent);
+	        if(timeOutEvent!=0 && longClick==0){//点击
+	            //此处为点击事件
+	        }
+	        return false;
+	    }
+	});
 	
 	$('.room-ul .content-img').on('click',function(){	// 预览图片
 		const docEl = document.documentElement
@@ -465,10 +497,7 @@ $(document).ready(function () {
 	})
 	
 	
-	function hideMask() {
-	    $('.mask').hide()
-	    $('.online-layer').removeClass('show-layer')
-	}
+	
 	
 	
     $('.room-head .head-msg').on('click', function () {

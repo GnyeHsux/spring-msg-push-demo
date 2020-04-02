@@ -42,7 +42,7 @@ ul{list-style: none;}
 .room-ul .con-li .li-avator{width: .8rem;height: .8rem;display: block;border-radius: 50%;}
 .room-ul .con-li .li-info{flex: 1;margin-left: .2rem;}
 .room-ul .con-li .info-name{font-size: .24rem;color: #666;margin-bottom: .1rem;}
-.room-ul .con-li .li-content{width: auto;border-radius: .2rem;background: white;padding: .2rem;box-sizing: border-box;display: block;float: left;}
+.room-ul .con-li .li-content{width: auto;border-radius: .2rem;background: white;padding: .2rem;box-sizing: border-box;display: block;float: left;position: relative;}
 .room-ul .con-li .content-img{width: 50%;display: block;}
 .room-ul .con-li.user-li{justify-content: flex-end;}
 .room-ul .user-li .li-info{margin-left: 0;margin-right: .2rem;}
@@ -54,9 +54,9 @@ ul{list-style: none;}
 .chat-bot .bot-input{display: block;border: none;background: white;border-radius: .3rem;padding: 0 .3rem;box-sizing: border-box;flex: 1;height: .8rem;box-shadow:0 .08rem .4rem 0 rgba(0,0,0,0.08);z-index: 3;}
 .chat-bot .bot-btn{width: .6rem;height: .6rem;background: url(../images/send_icon.png) no-repeat center center;background-size: contain;margin-left: .3rem;}
 .chat-bot .bot-btn.menu-add{background-image: url(../images/menu_add.png);}
-.chat-bot .menu-layer{position: absolute;bottom: 1rem;right: .5rem;width: 2rem;background: white;box-shadow:0 .08rem .4rem 0 rgba(0,0,0,0.08);border-radius: .14rem;transform: scale(0,0);transition: all ease 300ms;}
-.chat-bot .menu-layer.show-layer{transform: scale(1,1);transition: all ease 500ms;}
-.chat-bot .menu-layer .con-menu{width: 100%;line-height: .8rem;text-align: center;font-size: .3rem;color: #333333;display: block;}
+.menu-layer{position: absolute;bottom: 1rem;right: .5rem;width: 2rem;background: white;box-shadow:0 .08rem .4rem 0 rgba(0,0,0,0.08);border-radius: .14rem;transform: scale(0,0);transition: all ease 300ms;}
+.menu-layer.show-layer{transform: scale(1,1);transition: all ease 500ms;}
+.menu-layer .con-menu{width: 100%;line-height: .8rem;text-align: center;font-size: .3rem;color: #333333;display: block;}
 
 .online-layer{position: fixed;top: 0;left: 0;width: 60%;height: 100%;background: white;z-index: 16;transform: translate(-100%,0);transition: all ease 300ms;}
 .online-layer.show-layer{transform: translate(0,0);transition: all ease 500ms;}
@@ -68,6 +68,8 @@ ul{list-style: none;}
 .img-preview .pre-box{width: 100%;height: 100%;justify-content: center;}
 .img-preview .pre-img{width: 100%;height: 100%;display: block;}
 
+.room-ul .con-li .li-content .menu-layer{bottom: 50%;left: 50%;}
+.room-ul .con-li .li-content .menu-layer .con-menu{line-height: .6rem;}
 
 
 /*
