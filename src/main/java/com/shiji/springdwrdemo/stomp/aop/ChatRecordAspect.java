@@ -1,15 +1,17 @@
 package com.shiji.springdwrdemo.stomp.aop;
 
+import com.shiji.springdwrdemo.dao.MessageRecordRepository;
 import com.shiji.springdwrdemo.stomp.domain.dto.ChatRecordDTO;
+import com.shiji.springdwrdemo.stomp.domain.mo.MessageRecord;
 import com.shiji.springdwrdemo.stomp.domain.vo.MessageVO;
 import com.shiji.springdwrdemo.stomp.enums.MessageTypeEnum;
 import com.shiji.springdwrdemo.stomp.service.ChatRecordService;
-import com.shiji.springdwrdemo.stomp.utils.SensitiveWordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -28,6 +30,9 @@ public class ChatRecordAspect {
 
     @Resource
     private ChatRecordService chatRecordService;
+
+    @Autowired
+    private MessageRecordRepository messageRecordRepository;
 
     @Pointcut("@annotation(com.shiji.springdwrdemo.stomp.annotation.ChatRecord)")
     public void chatRecordPointcut() {
@@ -50,7 +55,14 @@ public class ChatRecordAspect {
 
         if (messageVO.getType() == MessageTypeEnum.USER) {
             // 对于User类型的消息做敏感词处理
-            messageVO.setMessage(SensitiveWordUtils.loveChina(messageVO.getMessage()));
+//            messageVO.setMessage(SensitiveWordUtils.loveChina(messageVO.getMessage()));
+            // 记录聊天信息
+            MessageRecord record = MessageRecord.toMessageRecord(messageVO);
+            if (messageVO.getReceiver() == null) {
+                record.setGroupMsg(true);
+                record.setGroupId("lgp");
+            }
+            messageRecordRepository.insert(record);
         }
 
         log.debug("添加聊天记录 -> {}", messageVO);

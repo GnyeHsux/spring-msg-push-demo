@@ -54,6 +54,7 @@ function connect() {
     stompClient.heartbeat.incoming = 0;
 
     var user = {
+        'userId' : uid,
         'username': username,
         'avatar': $("#avatar")[0].src,
         'address': "地球村"
@@ -213,7 +214,6 @@ function disConnect() {
     if (stompClient !== null) {
         stompClient.disconnect();
     }
-    $('#openSocket').attr("disabled", false);
 }
 
 function showMsg(data) {

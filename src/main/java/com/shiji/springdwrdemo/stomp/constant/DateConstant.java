@@ -11,7 +11,7 @@ public interface DateConstant {
     /**
      * 发送消息时间格式
      */
-    String SEND_TIME_FORMAT = "yyyy/MM/dd HH:mm";
+    String SEND_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 
     /**
      * 聊天记录文件名为指定时间格式的字符

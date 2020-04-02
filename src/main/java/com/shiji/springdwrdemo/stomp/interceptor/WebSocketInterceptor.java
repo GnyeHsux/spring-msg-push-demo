@@ -1,11 +1,15 @@
 package com.shiji.springdwrdemo.stomp.interceptor;
 
+import com.shiji.springdwrdemo.dao.UserLoginInfoRepository;
 import com.shiji.springdwrdemo.dao.UserRepository;
+import com.shiji.springdwrdemo.stomp.constant.DateConstant;
 import com.shiji.springdwrdemo.stomp.constant.UserStatusConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.User;
-import com.shiji.springdwrdemo.stomp.utils.SensitiveWordUtils;
+import com.shiji.springdwrdemo.stomp.domain.mo.UserLoginInfo;
+import com.shiji.springdwrdemo.stomp.utils.DateUtils;
 import com.shiji.springdwrdemo.stomp.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.messaging.Message;
@@ -29,7 +33,10 @@ import java.util.Optional;
 public class WebSocketInterceptor implements ChannelInterceptor {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserLoginInfoRepository userLoginInfoRepository;
 
     /**
      * 绑定用户信息
@@ -43,28 +50,60 @@ public class WebSocketInterceptor implements ChannelInterceptor {
         log.debug("进入拦截器 -> preSend");
         StompHeaderAccessor stompHeaderAccessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (StompCommand.CONNECT.equals(stompHeaderAccessor.getCommand())) {
+            String userId = stompHeaderAccessor.getFirstNativeHeader("userId");
             String username = stompHeaderAccessor.getFirstNativeHeader("username");
 
             User user = new User();
-            user.setUsername(username);
-            Optional<User> optionalUser = userRepository.findOne(Example.of(user));
-            if (optionalUser.isPresent()) {
-                user = optionalUser.get();
-                user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
-                user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
-                user.setStatus(UserStatusConstant.ONLINE);
-                userRepository.save(user);
-            } else {
+            if (StringUtils.isBlank(userId)) {
                 user.setUserId(UUIDUtils.create());
                 user.setUsername(username);
                 user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
                 user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
                 user.setStatus(UserStatusConstant.ONLINE);
                 userRepository.insert(user);
+            } else {
+                user.setUserId(userId);
+                Optional<User> userRst = userRepository.findOne(Example.of(user));
+                if (userRst.isPresent()) {
+                    user = userRst.get();
+                    user.setUsername(username);
+                    user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
+                    user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
+                    user.setStatus(UserStatusConstant.ONLINE);
+                    userRepository.save(user);
+                } else {
+                    user.setUserId(UUIDUtils.create());
+                    user.setUsername(username);
+                    user.setAvatar(stompHeaderAccessor.getFirstNativeHeader("avatar"));
+                    user.setAddress(stompHeaderAccessor.getFirstNativeHeader("address"));
+                    user.setStatus(UserStatusConstant.ONLINE);
+                    userRepository.insert(user);
+                }
             }
 
             stompHeaderAccessor.setUser(user);
             log.info("绑定用户信息 -> {}", user);
+
+            // 记录登录信息
+            UserLoginInfo loginInfo = new UserLoginInfo();
+            loginInfo.setUserId(user.getUserId());
+
+            Optional<UserLoginInfo> loginInfoRst = userLoginInfoRepository.findOne(Example.of(loginInfo));
+            if (loginInfoRst.isPresent()) {
+                loginInfo = loginInfoRst.get();
+                loginInfo.setUsername(user.getUsername());
+                loginInfo.setAddress(user.getAddress());
+                loginInfo.setLastLoginTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT));
+                loginInfo.setLoginTimes(loginInfo.getLoginTimes() + 1);
+                userLoginInfoRepository.save(loginInfo);
+            } else {
+                loginInfo.setUsername(user.getUsername());
+                loginInfo.setAddress(user.getAddress());
+                loginInfo.setFirstLoginTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT));
+                loginInfo.setLastLoginTime(loginInfo.getFirstLoginTime());
+                loginInfo.setLoginTimes(1);
+                userLoginInfoRepository.insert(loginInfo);
+            }
         }
 
         return message;

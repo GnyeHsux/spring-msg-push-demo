@@ -1,9 +1,11 @@
 package com.shiji.springdwrdemo.stomp.service.impl;
 
+import com.shiji.springdwrdemo.dao.OfflineMessageRepository;
 import com.shiji.springdwrdemo.stomp.annotation.ChatRecord;
 import com.shiji.springdwrdemo.stomp.cache.UserCache;
 import com.shiji.springdwrdemo.stomp.constant.RobotConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
+import com.shiji.springdwrdemo.stomp.domain.mo.OfflineMessage;
 import com.shiji.springdwrdemo.stomp.domain.mo.User;
 import com.shiji.springdwrdemo.stomp.domain.vo.MessageVO;
 import com.shiji.springdwrdemo.stomp.domain.vo.ResponseVO;
@@ -15,11 +17,15 @@ import com.shiji.springdwrdemo.stomp.service.MessageService;
 import com.shiji.springdwrdemo.stomp.utils.CheckUtils;
 import com.shiji.springdwrdemo.stomp.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author xsy
@@ -31,6 +37,10 @@ public class MessageServiceImpl implements MessageService {
 
     @Resource
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private OfflineMessageRepository offlineMessageRepository;
+
     /*@Resource
     private RobotService robotService;*/
 
@@ -52,15 +62,27 @@ public class MessageServiceImpl implements MessageService {
 
     @ChatRecord
     @Override
-    public void sendMessageToUser(String[] receiver, MessageVO messageVO) throws Exception {
-        if (!CheckUtils.checkReceiver(receiver)) {
+    public void sendMessageToUser(String[] receivers, MessageVO messageVO) throws Exception {
+        if (!CheckUtils.checkReceiver(receivers)) {
             throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);
         }
 
         ResponseVO responseVO = buildResponseVo(messageVO);
-        for (int i = 0, len = receiver.length; i < len; i++) {
-            // 将消息发送到指定用户 参数说明：1.消息接收者 2.消息订阅地址 3.消息内容
-            messagingTemplate.convertAndSendToUser(receiver[i], StompConstant.SUB_USER, responseVO);
+        List<OfflineMessage> offlineMessageList = new ArrayList<>();
+        for (String receiverId : receivers) {
+            User receiver = UserCache.getUser(receiverId);
+            if (receiver == null) {
+                log.info("用户【{}】离线，保存离线信息...", receiverId);
+                OfflineMessage offlineMsg = OfflineMessage.builder().messageId(messageVO.getMessageId()).receiverId(receiverId).build();
+                offlineMessageList.add(offlineMsg);
+            } else {
+                // 将消息发送到指定用户 参数说明：1.消息接收者 2.消息订阅地址 3.消息内容
+                messagingTemplate.convertAndSendToUser(receiverId, StompConstant.SUB_USER, responseVO);
+            }
+        }
+        //保存离线消息
+        if (CollectionUtils.isNotEmpty(offlineMessageList)) {
+            offlineMessageRepository.insert(offlineMessageList);
         }
     }
 
