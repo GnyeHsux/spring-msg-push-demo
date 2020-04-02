@@ -52,10 +52,12 @@ public class MessageVO implements Serializable {
     /**
      * 消息id
      */
+    @Setter
     private String messageId;
     /**
      * 发送时间
      */
+    @Setter
     private String sendTime;
 
     /**

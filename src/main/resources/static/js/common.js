@@ -1,19 +1,19 @@
 // 是否打开通知
-var openNotice = true;
+let openNotice = true;
 
 // 窗口可见
-var visible = true;
+let visible = true;
 // 是否打开提示音
-var opendSound = true;
+let opendSound = true;
 
-var title = document.title;
+let title = document.title;
 // 用户名
-var username = '';
+let username = '';
 // 用户id
-var uid = null;
+let uid = null;
 
 window.onload = function () {
-    var userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
+    let userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
     $('#userName').val(userInfo.username);
     $("#avatar").attr("src", userInfo.avatar);
     uid = userInfo.userId;
@@ -35,17 +35,17 @@ window.onload = function () {
         if (e.keyCode != 13) return;
         e.preventDefault();
         // 发送信息
-        sendMsg('group');
+        sendMsg();
     });
 }
 
-// var vConsole = new VConsole();
+// let vConsole = new VConsole();
 
-var stompClient = null;
-var onlineUserList = [];
+let stompClient = null;
+let onlineUserList = [];
 
 function connect() {
-    var socket = new SockJS('/stomp-websocket');
+    let socket = new SockJS('/stomp-websocket');
     stompClient = Stomp.over(socket);
 
     // 每隔30秒做一次心跳检测
@@ -53,7 +53,7 @@ function connect() {
     // 客户端不接收服务器的心跳检测
     stompClient.heartbeat.incoming = 0;
 
-    var user = {
+    let user = {
         'userId' : uid,
         'username': username,
         'avatar': $("#avatar")[0].src,
@@ -107,7 +107,7 @@ function connect() {
  * @param data
  */
 function handleMessage(data) {
-    var msg = data.message;
+    let msg = data.message;
     switch (data.type) {
         case 'USER':
             showUserMsg(data);
@@ -129,28 +129,28 @@ function handleMessage(data) {
     msgNotice(data);
 }
 
-function showSystemMsg(msg) {
-    var msg = `<li style="color: #999; font-size: 0.22rem; text-align: center">${"系统消息: " + msg}</li>`;
+function showSystemMsg(msgStr) {
+    let msg = `<li style="color: #999; font-size: 0.22rem; text-align: center">${"系统消息: " + msgStr}</li>`;
     showMsg(msg);
 }
 
 function showUserMsg(data) {
-    var msg = null;
-    var content = data.message;
+    let msg = null;
+    let content = data.message;
     if (data.image != null) {
         content = `<img style="width: 5rem" src="${data.image}"/>`
     }
     if (uid === data.user.userId) {
-        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name">${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
+        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name"><span style="margin-right: .1rem;">${data.sendTime}</span>${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
     } else {
-        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}</div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
+        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}<span aria-busy="margin-left: .1rem;">${data.sendTime}</span></div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
 
     showMsg(msg);
 }
 
 function showRevokeMsg(data) {
-    var obj = document.getElementById(data.revokeMessageId);
+    let obj = document.getElementById(data.revokeMessageId);
     obj.innerHTML = "<span style='color: gray'>已撤回...</span>";
 }
 
@@ -160,7 +160,7 @@ function showRevokeMsg(data) {
  * @returns {*}
  */
 function getData(data) {
-    var obj = JSON.parse(data);
+    let obj = JSON.parse(data);
     codeMapping(obj);
     return obj.data;
 }
@@ -184,24 +184,44 @@ function codeMapping(date) {
 
 function flushOnlineGroup(data) {
     onlineUserList = data.onlineUserList;
-    console.log(onlineUserList);
+
+    let userList = window.localStorage.getItem('userList');
+    if (userList == null) {
+        userList = [{id: uid, name: username}]
+    } else {
+        userList = JSON.parse(userList);
+    }
 
     $(".online-layer .line-ul").empty();
     for (let index in onlineUserList) {
         if (onlineUserList[index].userId === uid) {
             $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">我</li>`)
         } else {
-            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">${onlineUserList[index].username}</li>`)
+            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px" userId="${onlineUserList[index].userId}">${onlineUserList[index].username}</li>`)
+        }
+
+        let user = userList.find(function (item) {
+            return item.id === onlineUserList[index].userId;
+        });
+        console.log("user --->>>> " + user);
+        if (user == null) {
+            userList.push({
+                id: onlineUserList[index].userId,
+                name: onlineUserList[index].username
+            })
+        } else {
+            user.name = onlineUserList[index].username;
         }
     }
+    window.localStorage.setItem('userList', JSON.stringify(userList))
 }
 
 /**
  * 跳到聊天界面最底下
  */
 function jumpToLow() {
-    var roomUl = document.getElementById("room-ul");
-    var roomContainer = document.getElementById("room-container");
+    let roomUl = document.getElementById("room-ul");
+    let roomContainer = document.getElementById("room-container");
     roomContainer.scrollTo({
         top: roomUl.scrollHeight,
         behavior: "smooth"
@@ -220,33 +240,49 @@ function showMsg(data) {
     jumpToLow();
 }
 
-function sendMsg(type) {
+function sendMsg() {
+    let type = 'group';
     // 获取发送的内容
-    var content = $("#msg-need-send").val();
+    let content = $("#msg-need-send").val();
     // 内容不能为空
     if (content.trim().length < 1) {
         return;
     }
 
-    var data = {
+    let toUser = [uid];
+    let names = content.split('@');
+    console.log("names: " + names);
+
+    for (let name of names) {
+        let index = name.indexOf(' ');
+        let userId = getUserIdByName(name.substr(0, index !== -1 ? index : name.length));
+        // userId不能是空的，且toUser数组中不存在该userId
+        if (userId !== undefined && userId !== '' && toUser.indexOf(userId) === -1) {
+            toUser.push(userId);
+        }
+    }
+
+    let data = {
         "message": content
     };
-    var pub = '/chatRoom';
-    if ('user' === type) {
+    let pub = '/chatRoom';
+    console.log(toUser)
+    if (toUser.length > 1) {
         pub = '/chat';
-        data.receiver = [$("#toUserId").val(), uid];
+        data.receiver = toUser;
     }
 
     data = JSON.stringify(data);
+    console.log(data);
     sendMessage(pub, {}, data);
 
     $("#msg-need-send").val('');
 }
 
 function revokeMsg(e) {
-    var dom = $(e);
-    var messageId = dom.attr("id");
-    var receiver = dom.attr("receiver")
+    let dom = $(e);
+    let messageId = dom.attr("id");
+    let receiver = dom.attr("receiver")
 
     if (receiver === null || receiver === '' || receiver === 'null' || messageId === undefined) {
         receiver = null;
@@ -254,7 +290,7 @@ function revokeMsg(e) {
         receiver = receiver.split(',');
     }
 
-    var data = JSON.stringify({
+    let data = JSON.stringify({
         'messageId': messageId,
         'receiver': receiver
     });
@@ -278,14 +314,16 @@ function sendMessage(pub, header, data) {
  * @returns {Document.userId|string}
  */
 function getUserIdByName(name) {
-    if (name == '') {
+    if (name === '') {
         return '';
     }
+    let userList = window.localStorage.getItem('userList');
+    userList = JSON.parse(userList);
 
-    for (var i = 0; i < onlineUserList.length; i++) {
-        var obj = onlineUserList[i];
-        if (obj.userId !== uid && obj.username === name) {
-            return obj.userId;
+    for (let i = 0; i < userList.length; i++) {
+        let obj = userList[i];
+        if (obj.id !== uid && obj.name === name) {
+            return obj.id;
         }
     }
 }
@@ -298,18 +336,18 @@ function selectFile(id) {
 }
 
 function sendImage(id) {
-    var image = $("#" + id).val();
+    let image = $("#" + id).val();
     if (image === '' || image === undefined) {
         return;
     }
 
-    var filename = image.replace(/.*(\/|\\)/, "");
-    var fileExt = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename.toUpperCase()) : '';
+    let filename = image.replace(/.*(\/|\\)/, "");
+    let fileExt = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename.toUpperCase()) : '';
 
-    var file = $('#' + id).get(0).files[0];
-    var fileSize = file.size;
-    var mb = 30;
-    var maxSize = mb * 1024 * 1024;
+    let file = $('#' + id).get(0).files[0];
+    let fileSize = file.size;
+    let mb = 30;
+    let maxSize = mb * 1024 * 1024;
 
     if (fileExt != 'PNG' && fileExt != 'GIF' && fileExt != 'JPG' && fileExt != 'JPEG' && fileExt != 'BMP') {
         alert('发送失败，图片格式有误！');
@@ -318,7 +356,7 @@ function sendImage(id) {
         alert('上传的图片不能超过' + mb + 'MB');
         return;
     } else {
-        var data = new FormData();
+        let data = new FormData();
         data.append('file', file);
         $.ajax({
             url: "/api/upload/image",
@@ -330,7 +368,7 @@ function sendImage(id) {
             contentType: false,
             success: function (data) {
                 codeMapping(data);
-                var rep = data.data;
+                let rep = data.data;
                 if (id === 'file') {
                     sendImageToChatRoom(rep.path);
                 } else {
@@ -347,7 +385,7 @@ function sendImage(id) {
  * 发送图片到聊天室
  */
 function sendImageToChatRoom(image) {
-    var data = JSON.stringify({
+    let data = JSON.stringify({
         "image": image
     });
     sendMessage('/chatRoom', {}, data);
@@ -385,7 +423,7 @@ function msgNoticeByTitle() {
  * 播放提示音
  */
 function beep() {
-    var beep = document.getElementById('beep');
+    let beep = document.getElementById('beep');
     beep.play();
 }
 
@@ -413,29 +451,6 @@ $(document).ready(function () {
         if (username === '') {
             return
         } else {
-            let userList = window.localStorage.getItem('userList')
-            if (userList != null) {
-                userList = JSON.parse(userList)
-                if (userList.length > 0) {
-                    const checkUser = () => {
-                        for (let i in userList) {
-                            if (userList[i].name === username) {
-                                return true
-                            }
-                            return false
-                        }
-                    }
-                    if (!checkUser()) {
-                        userList.push({
-                            id: userList.length + 1,
-                            name: username
-                        })
-                    }
-                }
-            } else {
-                userList = [{id: 1, name: username}]
-            }
-            window.localStorage.setItem('userList', JSON.stringify(userList))
             window.localStorage.setItem('customName', JSON.stringify(username))
             $(".page-pre-enter").addClass('hide-enter')
             connect()

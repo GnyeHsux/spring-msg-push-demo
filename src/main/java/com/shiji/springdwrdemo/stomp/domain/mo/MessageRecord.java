@@ -18,6 +18,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
+@Builder
 public class MessageRecord implements Serializable {
 
     private static final long serialVersionUID = 319516027267892760L;
@@ -48,9 +49,18 @@ public class MessageRecord implements Serializable {
             return null;
         }
 
-        MessageRecord messageRecord = new MessageRecord();
+        MessageRecord messageRecord = MessageRecord.builder().build();
         BeanUtils.copyProperties(messageVO, messageRecord);
         messageRecord.setMsgType(messageVO.getType());
         return messageRecord;
+    }
+
+    public MessageVO toMessageVO() {
+        MessageVO messageVO = new MessageVO();
+        messageVO.setType(this.getMsgType());
+        messageVO.setMessageId(this.getMessageId());
+        messageVO.setSendTime(this.getSendTime());
+        BeanUtils.copyProperties(this, messageVO);
+        return messageVO;
     }
 }

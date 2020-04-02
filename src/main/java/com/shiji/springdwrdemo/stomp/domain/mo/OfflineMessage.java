@@ -24,7 +24,7 @@ public class OfflineMessage implements Serializable {
 
     private String messageId;
 
-    private int hasSend = 0;
+    private Boolean hasSend = false;
 
     private String reSendTime;
 

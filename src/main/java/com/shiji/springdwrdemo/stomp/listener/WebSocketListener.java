@@ -1,17 +1,25 @@
 package com.shiji.springdwrdemo.stomp.listener;
 
+import com.shiji.springdwrdemo.dao.MessageRecordRepository;
+import com.shiji.springdwrdemo.dao.OfflineMessageRepository;
 import com.shiji.springdwrdemo.dao.UserRepository;
 import com.shiji.springdwrdemo.stomp.cache.UserCache;
+import com.shiji.springdwrdemo.stomp.constant.DateConstant;
 import com.shiji.springdwrdemo.stomp.constant.MessageConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
 import com.shiji.springdwrdemo.stomp.constant.UserStatusConstant;
+import com.shiji.springdwrdemo.stomp.domain.mo.MessageRecord;
+import com.shiji.springdwrdemo.stomp.domain.mo.OfflineMessage;
 import com.shiji.springdwrdemo.stomp.domain.mo.User;
 import com.shiji.springdwrdemo.stomp.domain.vo.DynamicMsgVo;
 import com.shiji.springdwrdemo.stomp.domain.vo.MessageVO;
 import com.shiji.springdwrdemo.stomp.service.MessageService;
+import com.shiji.springdwrdemo.stomp.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.domain.Example;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -20,6 +28,8 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -30,6 +40,12 @@ public class WebSocketListener {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OfflineMessageRepository offlineMessageRepository;
+
+    @Autowired
+    private MessageRecordRepository messageRecordRepository;
 
     private User user;
 
@@ -60,7 +76,7 @@ public class WebSocketListener {
         UserCache.removeUser(userId);
 
         // 广播离线消息
-        sendMessage(buildMessageVo(user, MessageConstant.OFFLINE_MESSAGE));
+        sendGroupMessage(buildMessageVo(user, MessageConstant.OFFLINE_MESSAGE));
         log.info("广播离线消息 -> {}", user);
     }
 
@@ -70,8 +86,7 @@ public class WebSocketListener {
         StompHeaderAccessor stompHeaderAccessor = MessageHeaderAccessor.getAccessor(sessionSubscribeEvent.getMessage(),
                 StompHeaderAccessor.class);
 
-        if (StompConstant.SUB_STATUS.equals(stompHeaderAccessor.getFirstNativeHeader(StompHeaderAccessor
-                .STOMP_DESTINATION_HEADER))) {
+        if (StompConstant.SUB_STATUS.equals(stompHeaderAccessor.getFirstNativeHeader(StompHeaderAccessor.STOMP_DESTINATION_HEADER))) {
             if (user != null) {
                 try {
                     // 延迟100ms，防止客户端来不及接收上线消息
@@ -81,15 +96,34 @@ public class WebSocketListener {
                 }
 
                 // 广播上线消息
-                sendMessage(buildMessageVo(user, MessageConstant.ONLINE_MESSAGE));
+                sendGroupMessage(buildMessageVo(user, MessageConstant.ONLINE_MESSAGE));
                 // 发送机器人欢迎消息
 //                sendRobotMessage(String.format(MessageConstant.ROBOT_WELCOME_MESSAGE, user.getUsername()));
                 log.info("广播上线消息 -> {}", user);
             }
+        }
 
+        // 发送离线消息
+        if (user != null) {
+            if (("/user/" + user.getUserId() + StompConstant.SUB_USER).equals(stompHeaderAccessor.getFirstNativeHeader(StompHeaderAccessor.STOMP_DESTINATION_HEADER))) {
+                OfflineMessage offlineMessage = OfflineMessage.builder().receiverId(user.getUserId()).hasSend(false).build();
+
+                List<OfflineMessage> msgRst = offlineMessageRepository.findAll(Example.of(offlineMessage));
+                if (CollectionUtils.isNotEmpty(msgRst)) {
+                    for (OfflineMessage message : msgRst) {
+                        Optional<MessageRecord> messageRst = messageRecordRepository.findOne(Example.of(MessageRecord.builder().messageId(message.getMessageId()).build()));
+                        if (messageRst.isPresent()) {
+                            sendUserMessage(message.getReceiverId(), messageRst.get().toMessageVO());
+                            //发送完毕回写记录已重新发送
+                            message.setHasSend(true);
+                            message.setReSendTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT));
+                            offlineMessageRepository.save(message);
+                        }
+                    }
+                }
+            }
         }
     }
-
 
 
     /**
@@ -97,8 +131,12 @@ public class WebSocketListener {
      *
      * @param messageVO
      */
-    private void sendMessage(MessageVO messageVO) throws Exception {
+    private void sendGroupMessage(MessageVO messageVO) throws Exception {
         messageService.sendMessage(StompConstant.SUB_STATUS, messageVO);
+    }
+
+    private void sendUserMessage(String receiver, MessageVO messageVO) throws Exception {
+        messageService.sendMessageToUser(new String[]{receiver}, messageVO);
     }
 
     /**

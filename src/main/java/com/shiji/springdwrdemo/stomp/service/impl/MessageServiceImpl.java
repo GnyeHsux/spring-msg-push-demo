@@ -73,7 +73,7 @@ public class MessageServiceImpl implements MessageService {
             User receiver = UserCache.getUser(receiverId);
             if (receiver == null) {
                 log.info("用户【{}】离线，保存离线信息...", receiverId);
-                OfflineMessage offlineMsg = OfflineMessage.builder().messageId(messageVO.getMessageId()).receiverId(receiverId).build();
+                OfflineMessage offlineMsg = OfflineMessage.builder().messageId(messageVO.getMessageId()).receiverId(receiverId).hasSend(false).build();
                 offlineMessageList.add(offlineMsg);
             } else {
                 // 将消息发送到指定用户 参数说明：1.消息接收者 2.消息订阅地址 3.消息内容
