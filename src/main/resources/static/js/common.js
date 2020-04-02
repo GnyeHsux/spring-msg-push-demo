@@ -17,7 +17,6 @@ window.onload = function () {
     if (userInfo !== null) {
         $('#userName').val(userInfo.username);
         $("#avatar").attr("src", userInfo.avatar);
-        uid = userInfo.userId;
     }
 
     // 监听窗口切换
@@ -60,9 +59,6 @@ function connect() {
         'avatar': $("#avatar")[0].src,
         'address': "地球村"
     };
-    if (uid !== null) {
-        user.userId = uid;
-    }
     stompClient.connect(user, function (frame) {
         $('#openSocket').attr("disabled", true);
         console.log('Connected: ' + frame);
