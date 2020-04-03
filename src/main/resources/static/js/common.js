@@ -324,14 +324,17 @@ function getUserIdByName(name) {
     if (name === '') {
         return '';
     }
-    let userList = window.localStorage.getItem('chatuserList');
-    userList = JSON.parse(userList);
+    let userList = onlineUserList; //window.localStorage.getItem('chatuserList');
+    // userList = JSON.parse(userList);
 
     for (let i = 0; i < userList.length; i++) {
         let obj = userList[i];
-        if (obj.id !== uid && obj.name === name) {
+        if (obj.userId !== uid && obj.username === name) {
             return obj.id;
         }
+        // if (obj.id !== uid && obj.name === name) {
+        //     return obj.id;
+        // }
     }
 }
 
