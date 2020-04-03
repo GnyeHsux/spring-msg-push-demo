@@ -13,6 +13,7 @@ let username = '';
 let uid = null;
 
 window.onload = function () {
+    
     let userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
     if (userInfo !== null) {
         $('#userName').val(userInfo.username);
@@ -138,7 +139,7 @@ function showUserMsg(data) {
     let msg = null;
     let content = data.message;
     if (data.image != null) {
-        content = `<img style="width: 5rem" src="${data.image}"/>`
+        content = `<img style="width: 5rem" src="${data.image}" onclick="showImage(this)"/>`
     }
     let sendTime = data.sendTime;
     let messageId = data.messageId;
@@ -471,7 +472,7 @@ $(document).ready(function () {
 	    }
 	});
 	
-	$('.room-ul .content-img').on('click',function(){	// 预览图片
+	/*$('.room-ul .content-img').on('click',function(){	// 预览图片
 		const docEl = document.documentElement
 		let cwidth = docEl.clientWidth
 		let cheight = docEl.clientHeight
@@ -491,7 +492,7 @@ $(document).ready(function () {
 			$('.img-preview .pre-img').attr('src',$(this).attr('src'))
 			$('.img-preview').show()
 		})
-	})
+	})*/
 	$('.img-preview').on('click',function(){
 		$(this).hide()
 	})
@@ -519,4 +520,27 @@ $(document).ready(function () {
             connect()
         }
     })
-})
+});
+
+
+function showImage(obj){	// 预览图片
+    const docEl = document.documentElement;
+    let cwidth = docEl.clientWidth;
+    let cheight = docEl.clientHeight;
+    let imgObj = $(obj).attr('src');
+
+    $("<img/>").attr("src", imgObj).on('load',function(){
+        let imgW = this.width,imgH = this.height;
+        let preImg = $('.img-preview .pre-img')
+        if((cwidth/cheight) >= (imgW/imgH)){
+            preImg.css('width',(cheight*imgW)/imgH)
+            preImg.css('height',cheight)
+        } else{
+            preImg.css('width',cwidth)
+            preImg.css('height',(cwidth*imgH)/imgW)
+        }
+
+        $('.img-preview .pre-img').attr('src',$(obj).attr('src'))
+        $('.img-preview').show()
+    })
+}
