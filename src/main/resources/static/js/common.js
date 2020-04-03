@@ -204,7 +204,7 @@ function flushOnlineGroup(data) {
         if (onlineUserList[index].userId === uid) {
             $(".online-layer .line-ul").append(`<li class="line-li bdb-1px">我</li>`)
         } else {
-            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px" userId="${onlineUserList[index].userId}">${onlineUserList[index].username}</li>`)
+            $(".online-layer .line-ul").append(`<li class="line-li bdb-1px" userId="${onlineUserList[index].userId}" onclick="selectUser('${onlineUserList[index].username}', '${onlineUserList[index].userId}')">${onlineUserList[index].username}</li>`)
         }
 
         let user = userList.find(function (item) {
@@ -547,10 +547,11 @@ function showImage(obj) {	// 预览图片
 
 
 function selectUser(name , id) {
-    $("#msg-need-send").val($("#msg-need-send").val() + "@" + name + " ");
-    let inputVal = $("#msg-need-send").val();
-    $("#msg-need-send").focus().val(inputVal);
-    /*setTimeout(() => {
+    setTimeout(() => {
         //此处为长按事件-----在此显执行撤销
-    }, 500);*/
+        $("#msg-need-send").val($("#msg-need-send").val() + "@" + name + " ");
+        let inputVal = $("#msg-need-send").val();
+        $("#msg-need-send").focus().val(inputVal);
+    }, 250);
+    hideMask();
 }
