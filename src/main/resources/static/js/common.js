@@ -13,7 +13,7 @@ let username = '';
 let uid = null;
 
 window.onload = function () {
-    
+
     let userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
     if (userInfo !== null) {
         $('#userName').val(userInfo.username);
@@ -150,7 +150,7 @@ function showUserMsg(data) {
     if (uid === data.user.userId) {
         msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name"><span style="margin-right: .1rem;">${sendTime}</span>${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
     } else {
-        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" ><div class="li-info"><div class="info-name">${data.user.username}<span style="margin-left: .1rem;">${sendTime}</span></div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
+        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" userName="${data.user.username}" ontouchstart="selectUser('${data.user.username}', '${data.user.userId}')"><div class="li-info"><div class="info-name">${data.user.username}<span style="margin-left: .1rem;">${sendTime}</span></div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
 
     showMsg(msg);
@@ -437,70 +437,70 @@ function beep() {
 
 /*      志熊js代码          */
 function hideMask() {
-	$('.mask').hide()
-	$('.online-layer').removeClass('show-layer')
+    $('.mask').hide()
+    $('.online-layer').removeClass('show-layer')
 }
 
 $(document).ready(function () {
-	
-	var self = this;
-	var longClick =0;
-	$(".li-info .li-content").on({
-	    touchstart: e=>{
-			console.log($(e).text())
-			console.log('touchstart')
-	        longClick=0;//设置初始为0
-	        timeOutEvent = setTimeout(()=>{
-	            //此处为长按事件-----在此显执行撤销
-	            longClick=1;//假如长按，则设置为1
-				$(e).remove()
-	        },500);
-	    },
-	    touchmove: () =>{
-			console.log('touchmove')
-	        clearTimeout(timeOutEvent);
-	        timeOutEvent = 0;
-	        e.preventDefault();
-	    },
-	    touchend: e=>{
-			console.log('touchend')
-	        clearTimeout(timeOutEvent);
-	        if(timeOutEvent!=0 && longClick==0){//点击
-	            //此处为点击事件
-	        }
-	        return false;
-	    }
-	});
-	
-	/*$('.room-ul .content-img').on('click',function(){	// 预览图片
-		const docEl = document.documentElement
-		let cwidth = docEl.clientWidth
-		let cheight = docEl.clientHeight
-		let imgObj = $(this).attr('src')
-		
-		$("<img/>").attr("src", imgObj).on('load',function(){
-			let imgW = this.width,imgH = this.height;
-			let preImg = $('.img-preview .pre-img')
-			if((cwidth/cheight) >= (imgW/imgH)){
-				preImg.css('width',(cheight*imgW)/imgH)
-				preImg.css('height',cheight)
-			} else{
-				preImg.css('width',cwidth)
-				preImg.css('height',(cwidth*imgH)/imgW)
-			}
-			
-			$('.img-preview .pre-img').attr('src',$(this).attr('src'))
-			$('.img-preview').show()
-		})
-	})*/
-	$('.img-preview').on('click',function(){
-		$(this).hide()
-	})
-	
-	
-	
-	
-	
+
+    /*var self = this;
+    var longClick = 0;
+    var timeOutEvent = 0;
+    $(".con-li .li-avator").on({
+        touchstart: e => {
+            console.log('touchstart');
+            longClick = 0;//设置初始为0
+            timeOutEvent = setTimeout(() => {
+                //此处为长按事件-----在此显执行撤销
+                longClick = 1;//假如长按，则设置为1
+                let selectName = $(e.target).attr('userName');
+                $("#msg-need-send").val($("#msg-need-send").val() + "@" + selectName + " ");
+                let inputVal = $("#msg-need-send").val();
+                $("#msg-need-send").focus().val(inputVal);
+            }, 500);
+        },
+        touchmove: e => {
+            console.log('touchmove');
+            clearTimeout(timeOutEvent);
+            timeOutEvent = 0;
+            e.preventDefault();
+        },
+        touchend: e => {
+            console.log('touchend');
+            clearTimeout(timeOutEvent);
+            if (timeOutEvent !== 0 && longClick === 0) {//点击
+                //此处为点击事件
+            }
+            return false;
+        }
+    });*/
+
+    /*$('.room-ul .content-img').on('click',function(){	// 预览图片
+        const docEl = document.documentElement
+        let cwidth = docEl.clientWidth
+        let cheight = docEl.clientHeight
+        let imgObj = $(this).attr('src')
+
+        $("<img/>").attr("src", imgObj).on('load',function(){
+            let imgW = this.width,imgH = this.height;
+            let preImg = $('.img-preview .pre-img')
+            if((cwidth/cheight) >= (imgW/imgH)){
+                preImg.css('width',(cheight*imgW)/imgH)
+                preImg.css('height',cheight)
+            } else{
+                preImg.css('width',cwidth)
+                preImg.css('height',(cwidth*imgH)/imgW)
+            }
+
+            $('.img-preview .pre-img').attr('src',$(this).attr('src'))
+            $('.img-preview').show()
+        })
+    })*/
+    $('.img-preview').on('click', function () {
+        $(this).hide()
+    })
+
+
     $('.room-head .head-msg').on('click', function () {
         $('.mask').show()
         $('.online-layer').addClass('show-layer')
@@ -523,24 +523,34 @@ $(document).ready(function () {
 });
 
 
-function showImage(obj){	// 预览图片
+function showImage(obj) {	// 预览图片
     const docEl = document.documentElement;
     let cwidth = docEl.clientWidth;
     let cheight = docEl.clientHeight;
     let imgObj = $(obj).attr('src');
 
-    $("<img/>").attr("src", imgObj).on('load',function(){
-        let imgW = this.width,imgH = this.height;
+    $("<img/>").attr("src", imgObj).on('load', function () {
+        let imgW = this.width, imgH = this.height;
         let preImg = $('.img-preview .pre-img')
-        if((cwidth/cheight) >= (imgW/imgH)){
-            preImg.css('width',(cheight*imgW)/imgH)
-            preImg.css('height',cheight)
-        } else{
-            preImg.css('width',cwidth)
-            preImg.css('height',(cwidth*imgH)/imgW)
+        if ((cwidth / cheight) >= (imgW / imgH)) {
+            preImg.css('width', (cheight * imgW) / imgH)
+            preImg.css('height', cheight)
+        } else {
+            preImg.css('width', cwidth)
+            preImg.css('height', (cwidth * imgH) / imgW)
         }
 
-        $('.img-preview .pre-img').attr('src',$(obj).attr('src'))
+        $('.img-preview .pre-img').attr('src', $(obj).attr('src'))
         $('.img-preview').show()
     })
+}
+
+
+function selectUser(name , id) {
+    setTimeout(() => {
+        //此处为长按事件-----在此显执行撤销
+        $("#msg-need-send").val($("#msg-need-send").val() + "@" + name + " ");
+        let inputVal = $("#msg-need-send").val();
+        $("#msg-need-send").focus().val(inputVal);
+    }, 500);
 }
