@@ -547,10 +547,10 @@ function showImage(obj) {	// 预览图片
 
 
 function selectUser(name , id) {
-    setTimeout(() => {
+    $("#msg-need-send").val($("#msg-need-send").val() + "@" + name + " ");
+    let inputVal = $("#msg-need-send").val();
+    $("#msg-need-send").focus().val(inputVal);
+    /*setTimeout(() => {
         //此处为长按事件-----在此显执行撤销
-        $("#msg-need-send").val($("#msg-need-send").val() + "@" + name + " ");
-        let inputVal = $("#msg-need-send").val();
-        $("#msg-need-send").focus().val(inputVal);
-    }, 500);
+    }, 500);*/
 }
