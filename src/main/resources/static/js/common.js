@@ -57,9 +57,12 @@ function connect() {
 
     let user = {
         'username': username,
-        'avatar': $("#avatar")[0].src,
+        // 'avatar': $("#avatar")[0].src,
         'address': "地球村"
     };
+    if (!$("#avatar")[0].src.endsWith('/images/avator.png')) {
+        user.avatar = $("#avatar")[0].src;
+    }
     stompClient.connect(user, function (frame) {
         $('#openSocket').attr("disabled", true);
         console.log('Connected: ' + frame);
@@ -114,7 +117,7 @@ function handleMessage(data) {
             showUserMsg(data);
             break;
         case 'SYSTEM':
-            showSystemMsg(msg);
+            showSystemMsg(data);
             break;
         case 'REVOKE':
             showRevokeMsg(data);
@@ -130,8 +133,18 @@ function handleMessage(data) {
     msgNotice(data);
 }
 
-function showSystemMsg(msgStr) {
-    let msg = `<li style="color: #999; font-size: 0.22rem; text-align: center">${"系统消息: " + msgStr}</li>`;
+function showSystemMsg(data) {
+    if (data.user.userId === uid) {
+        let avatar = data.user.avatar;
+        console.log(avatar);
+        let userInfo = JSON.parse(window.localStorage.getItem("userInfo"));
+        if (userInfo !== null) {
+            userInfo.avatar = avatar;
+            window.localStorage.setItem("userInfo", JSON.stringify(userInfo));
+        }
+    }
+
+    let msg = `<li style="color: #999; font-size: 0.22rem; text-align: center">${"系统消息: " + data.message}</li>`;
     showMsg(msg);
 }
 

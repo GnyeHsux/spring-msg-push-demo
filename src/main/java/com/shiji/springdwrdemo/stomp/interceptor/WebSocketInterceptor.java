@@ -54,6 +54,9 @@ public class WebSocketInterceptor implements ChannelInterceptor {
             String username = stompHeaderAccessor.getFirstNativeHeader("username");
             String avatar = stompHeaderAccessor.getFirstNativeHeader("avatar");
             String address = stompHeaderAccessor.getFirstNativeHeader("address");
+            if (StringUtils.isEmpty(avatar)) {
+                avatar = "/images/avator.png";
+            }
 
             User user = new User();
             if (StringUtils.isEmpty(userId)) {
@@ -61,11 +64,16 @@ public class WebSocketInterceptor implements ChannelInterceptor {
                 Optional<User> userRst = userRepository.findOne(Example.of(user));
                 if (userRst.isPresent()) {
                     user.setUserId(userRst.get().getUserId());
+                    if (!avatar.endsWith("/images/avator.png")) {
+                        user.setAvatar(avatar);
+                    } else {
+                        user.setAvatar(userRst.get().getAvatar());
+                    }
                 } else {
                     user.setUserId(UUIDUtils.create());
+                    user.setAvatar(avatar);
                 }
                 user.setUsername(username);
-                user.setAvatar(avatar);
                 user.setAddress(address);
                 user.setStatus(UserStatusConstant.ONLINE);
                 if (userRst.isPresent()) {
@@ -79,6 +87,9 @@ public class WebSocketInterceptor implements ChannelInterceptor {
                 if (userRst.isPresent()) {
                     user = userRst.get();
                     user.setUsername(username);
+                    if (!avatar.endsWith("/images/avator.png")) {
+                        user.setAvatar(avatar);
+                    }
                     user.setAvatar(avatar);
                     user.setAddress(address);
                     user.setStatus(UserStatusConstant.ONLINE);
