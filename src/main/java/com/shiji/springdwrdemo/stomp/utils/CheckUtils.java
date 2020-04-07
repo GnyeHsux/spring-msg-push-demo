@@ -64,16 +64,21 @@ public class CheckUtils {
      * @return true是图片 false不是图片
      */
     public static boolean isImage(String type) {
-        switch (StringUtils.lowerCase(type)) {
+        if (StringUtils.lowerCase(type).contains("image/")) {
+            return true;
+        }
+        return false;
+        /*switch (StringUtils.lowerCase(type)) {
             case "jpg":
             case "png":
             case "bmp":
             case "gif":
             case "jpeg":
+            case "jfif":
                 return true;
             default:
                 return false;
-        }
+        }*/
     }
 
     /**

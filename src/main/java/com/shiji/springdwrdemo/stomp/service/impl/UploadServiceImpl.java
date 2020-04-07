@@ -50,9 +50,10 @@ public class UploadServiceImpl implements UploadService {
         if (StringUtils.isEmpty(originalFilename)) {
             throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);
         }
+        log.info("file type: {}", multipartFile.getContentType());
 
         String type = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
-        if (!CheckUtils.isImage(type)) {
+        if (!CheckUtils.isImage(multipartFile.getContentType())) {
             throw new ErrorCodeException(CodeEnum.UPLOADED_FILE_IS_NOT_AN_IMAGE);
         }
         String md5 = Md5Utils.getMD5(multipartFile.getInputStream());
@@ -70,8 +71,6 @@ public class UploadServiceImpl implements UploadService {
         }
 
         multipartFile.transferTo(file);
-        log.info(multipartFile.getOriginalFilename());
-        log.info(multipartFile.getName());
 
         chatFileRepository.insert(ChatFile.builder().fileName(multipartFile.getOriginalFilename()).size(multipartFile.getSize()).md5(md5).fileType(type).url(respPath).createTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT)).build());
 

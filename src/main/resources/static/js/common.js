@@ -377,11 +377,17 @@ function sendImage(id) {
     let fileSize = file.size;
     let mb = 30;
     let maxSize = mb * 1024 * 1024;
-
-    if (fileExt != 'PNG' && fileExt != 'GIF' && fileExt != 'JPG' && fileExt != 'JPEG' && fileExt != 'BMP') {
+    if (typeof FileReader != 'undefined') {
+        let file = document.getElementById(id).files[0];
+        if ((file.type).indexOf("image/") === -1) {
+            alert('发送失败，图片格式有误！');
+            return;
+        }
+    } else if (fileExt != 'PNG' && fileExt != 'GIF' && fileExt != 'JPG' && fileExt != 'JPEG' && fileExt != 'BMP' && fileExt != 'JFIF') {
         alert('发送失败，图片格式有误！');
         return;
-    } else if (parseInt(fileSize) > parseInt(maxSize)) {
+    }
+    if (parseInt(fileSize) > parseInt(maxSize)) {
         alert('上传的图片不能超过' + mb + 'MB');
         return;
     } else {
@@ -568,7 +574,7 @@ function showImage(obj) {	// 预览图片
 }
 
 
-function selectUser(name , id) {
+function selectUser(name, id) {
     setTimeout(() => {
         //此处为长按事件-----在此显执行撤销
         $("#msg-need-send").val($("#msg-need-send").val() + "@" + name + " ");
