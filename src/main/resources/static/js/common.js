@@ -155,8 +155,10 @@ function showSystemMsg(data) {
 function showUserMsg(data) {
     let msg = null;
     let content = data.message;
+    let liStyle = ``;
     if (data.image != null) {
         content = `<img style="width: 5rem" src="${data.image}" onclick="showImage(this)"/>`
+        liStyle = `background: none;padding: 0;`;
     }
     let sendTime = data.sendTime;
     let messageId = data.messageId;
@@ -165,9 +167,9 @@ function showUserMsg(data) {
         messageId = data.realMessageId;
     }
     if (uid === data.user.userId) {
-        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name"><span style="margin-right: .1rem;">${sendTime}</span>${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen" receiver="${data.receiver}" id="${messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
+        msg = `<li class="con-li flex-row user-li"><div class="li-info"><div class="info-name"><span style="margin-right: .1rem;">${sendTime}</span>${data.user.username}</div><div ondblclick="revokeMsg(this)" class="li-content" style="background-color: lightgreen; ${liStyle}" receiver="${data.receiver}" id="${messageId}">${content}</div></div><img src="${data.user.avatar}" class="li-avator" ></li>`;
     } else {
-        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" userName="${data.user.username}" ontouchstart="selectUser('${data.user.username}', '${data.user.userId}')"><div class="li-info"><div class="info-name">${data.user.username}<span style="margin-left: .1rem;">${sendTime}</span></div><div class="li-content" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
+        msg = `<li class="con-li flex-row"><img src="${data.user.avatar}" class="li-avator" userName="${data.user.username}" ontouchstart="selectUser('${data.user.username}', '${data.user.userId}')"><div class="li-info"><div class="info-name">${data.user.username}<span style="margin-left: .1rem;">${sendTime}</span></div><div class="li-content" style="${liStyle}" receiver="${data.receiver}" id="${data.messageId}">${content}</div></div></li>`;
     }
 
     showMsg(msg);
