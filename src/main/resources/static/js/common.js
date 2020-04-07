@@ -18,6 +18,7 @@ window.onload = function () {
     if (userInfo !== null) {
         $('#userName').val(userInfo.username);
         $("#avatar").attr("src", userInfo.avatar);
+        uid = userInfo.userId;
     }
 
     // 监听窗口切换
@@ -34,7 +35,7 @@ window.onload = function () {
 
     // 页面加载完成监听回车事件
     document.getElementById("msg-need-send").addEventListener("keydown", function (e) {
-        if (e.keyCode != 13) return;
+        if (e.keyCode !== 13) return;
         e.preventDefault();
         // 发送信息
         sendMsg();
@@ -62,6 +63,9 @@ function connect() {
     };
     if (!$("#avatar")[0].src.endsWith('/images/avator.png')) {
         user.avatar = $("#avatar")[0].src;
+    }
+    if (uid !== null && uid !== '' && uid !== 'null' && uid !== undefined) {
+        user.userId = uid;
     }
     stompClient.connect(user, function (frame) {
         $('#openSocket').attr("disabled", true);
@@ -205,7 +209,7 @@ function codeMapping(date) {
 function flushOnlineGroup(data) {
     onlineUserList = data.onlineUserList;
 
-    let userList = window.localStorage.getItem('chatuserList');
+    let userList = window.localStorage.getItem('exitUserList');
     if (userList == null) {
         userList = [{id: uid, name: username}]
     } else {
@@ -233,7 +237,7 @@ function flushOnlineGroup(data) {
             user.name = onlineUserList[index].username;
         }
     }
-    window.localStorage.setItem('chatuserList', JSON.stringify(userList))
+    window.localStorage.setItem('exitUserList', JSON.stringify(userList))
 }
 
 /**
@@ -337,17 +341,17 @@ function getUserIdByName(name) {
     if (name === '') {
         return '';
     }
-    let userList = onlineUserList; //window.localStorage.getItem('chatuserList');
-    // userList = JSON.parse(userList);
+    let userList = window.localStorage.getItem('exitUserList');
+    userList = JSON.parse(userList);
 
     for (let i = 0; i < userList.length; i++) {
         let obj = userList[i];
-        if (obj.userId !== uid && obj.username === name) {
-            return obj.id;
-        }
-        // if (obj.id !== uid && obj.name === name) {
+        // if (obj.userId !== uid && obj.username === name) {
         //     return obj.id;
         // }
+        if (obj.id !== uid && obj.name === name) {
+            return obj.id;
+        }
     }
 }
 

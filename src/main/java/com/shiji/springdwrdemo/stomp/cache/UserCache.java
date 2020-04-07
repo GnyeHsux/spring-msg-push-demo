@@ -58,6 +58,18 @@ public class UserCache {
         return USER_MAP.get(key);
     }
 
+    /**
+     * 查询用户是否在线
+     * @param key
+     * @return
+     */
+    public static boolean isUserOnline(String key) {
+        if (getUser(key) == null) {
+            return false;
+        }
+        return true;
+    }
+
     public static User[] getUsers(String[] keys) {
         User[] users = new User[]{};
         if (ArrayUtils.isNotEmpty(keys)) {

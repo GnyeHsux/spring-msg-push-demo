@@ -40,7 +40,7 @@ public class MessageRecord implements Serializable {
 
     private String[] receiver;
 
-    private boolean groupMsg = false;
+    private Boolean groupMsg;
 
     private String groupId;
 

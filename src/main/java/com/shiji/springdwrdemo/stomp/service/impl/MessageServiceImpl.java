@@ -1,8 +1,10 @@
 package com.shiji.springdwrdemo.stomp.service.impl;
 
 import com.shiji.springdwrdemo.dao.OfflineMessageRepository;
+import com.shiji.springdwrdemo.dao.UserRepository;
 import com.shiji.springdwrdemo.stomp.annotation.ChatRecord;
 import com.shiji.springdwrdemo.stomp.cache.UserCache;
+import com.shiji.springdwrdemo.stomp.constant.MessageConstant;
 import com.shiji.springdwrdemo.stomp.constant.RobotConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.OfflineMessage;
@@ -41,6 +43,9 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private OfflineMessageRepository offlineMessageRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     /*@Resource
     private RobotService robotService;*/
 
@@ -56,8 +61,24 @@ public class MessageServiceImpl implements MessageService {
         if (!CheckUtils.checkSubAddress(subAddress)) {
             throw new ErrorCodeException(CodeEnum.INVALID_PARAMETERS);
         }
+        List<OfflineMessage> offlineMessageList = new ArrayList<>();
+        if (!messageVO.getType().equals(MessageTypeEnum.SYSTEM)) {
+            List<User> allUsers = userRepository.findAll();
+            for (User user : allUsers) {
+                if (!UserCache.isUserOnline(user.getUserId())) {
+                    //保存离线群消息
+                    OfflineMessage offlineMsg = OfflineMessage.builder().messageId(messageVO.getMessageId()).receiverId(user.getUserId()).hasSend(false).messageType("group").build();
+                    offlineMessageList.add(offlineMsg);
+                }
+            }
+        }
+
 
         messagingTemplate.convertAndSend(subAddress, buildResponseVo(messageVO));
+        //保存离线消息
+        if (CollectionUtils.isNotEmpty(offlineMessageList)) {
+            offlineMessageRepository.insert(offlineMessageList);
+        }
     }
 
     @ChatRecord
@@ -73,7 +94,7 @@ public class MessageServiceImpl implements MessageService {
             User receiver = UserCache.getUser(receiverId);
             if (receiver == null) {
                 log.info("用户【{}】离线，保存离线信息...", receiverId);
-                OfflineMessage offlineMsg = OfflineMessage.builder().messageId(messageVO.getMessageId()).receiverId(receiverId).hasSend(false).build();
+                OfflineMessage offlineMsg = OfflineMessage.builder().messageId(messageVO.getMessageId()).receiverId(receiverId).hasSend(false).messageType("user").build();
                 offlineMessageList.add(offlineMsg);
             } else {
                 // 将消息发送到指定用户 参数说明：1.消息接收者 2.消息订阅地址 3.消息内容

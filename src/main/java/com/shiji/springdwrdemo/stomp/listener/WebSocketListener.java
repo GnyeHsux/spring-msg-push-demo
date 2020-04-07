@@ -111,6 +111,7 @@ public class WebSocketListener {
                 List<OfflineMessage> msgRst = offlineMessageRepository.findAll(Example.of(offlineMessage));
                 if (CollectionUtils.isNotEmpty(msgRst)) {
                     for (OfflineMessage message : msgRst) {
+                        log.info(MessageRecord.builder().messageId(message.getMessageId()).build().toString());
                         Optional<MessageRecord> messageRst = messageRecordRepository.findOne(Example.of(MessageRecord.builder().messageId(message.getMessageId()).build()));
                         if (messageRst.isPresent()) {
                             sendUserMessage(message.getReceiverId(), messageRst.get().toMessageVO());

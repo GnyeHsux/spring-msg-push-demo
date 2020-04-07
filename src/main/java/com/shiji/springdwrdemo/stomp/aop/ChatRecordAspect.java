@@ -53,7 +53,7 @@ public class ChatRecordAspect {
 
         Assert.notNull(messageVO, "方法必需以MessageVO类或该类的子类作为参数");
 
-        if (messageVO.getType() == MessageTypeEnum.USER) {
+        if (messageVO.getType() != MessageTypeEnum.SYSTEM) {
             // 对于User类型的消息做敏感词处理
 //            messageVO.setMessage(SensitiveWordUtils.loveChina(messageVO.getMessage()));
             // 记录聊天信息
@@ -61,6 +61,8 @@ public class ChatRecordAspect {
             if (messageVO.getReceiver() == null) {
                 record.setGroupMsg(true);
                 record.setGroupId("lgp");
+            } else {
+                record.setGroupMsg(false);
             }
             messageRecordRepository.insert(record);
         }
