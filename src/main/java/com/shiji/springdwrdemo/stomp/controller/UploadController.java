@@ -1,15 +1,15 @@
 package com.shiji.springdwrdemo.stomp.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.shiji.springdwrdemo.stomp.annotation.ChatRecord;
-import com.shiji.springdwrdemo.stomp.domain.mo.ChatFile;
 import com.shiji.springdwrdemo.stomp.domain.vo.ResponseVO;
 import com.shiji.springdwrdemo.stomp.service.UploadService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,7 +18,7 @@ import java.util.Map;
  * @author yanpanyi
  * @date 2019/03/27
  */
-@CrossOrigin
+//@CrossOrigin
 @RestController
 @RequestMapping("/api/upload")
 public class UploadController {
