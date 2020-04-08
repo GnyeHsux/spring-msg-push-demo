@@ -18,6 +18,7 @@ import java.util.Map;
  * @author yanpanyi
  * @date 2019/03/27
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/api/upload")
 public class UploadController {
