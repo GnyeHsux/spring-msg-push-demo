@@ -157,9 +157,13 @@ function showUserMsg(data) {
     let content = data.message;
     let liStyle = ``;
     if (data.image != null) {
-        let imgName = data.image.substr(data.image.lastIndexOf("/"), data.image.length);
-        let imgPath = data.image.substr(0, data.image.lastIndexOf("/") + 1);
-        content = `<img style="width: 5rem" src="${imgPath + '25' + imgName}" imgName="${imgName}" imgPath="${imgPath}" onclick="showImage(this)"/>`
+        if (data.image.toLowerCase().endsWith(".gif")) {
+            content = `<img style="width: 5rem" src="${data.image}" onclick="showImage(this)"/>`
+        } else {
+            let imgName = data.image.substr(data.image.lastIndexOf("/"), data.image.length);
+            let imgPath = data.image.substr(0, data.image.lastIndexOf("/") + 1);
+            content = `<img style="width: 5rem" src="${imgPath + '25' + imgName}" imgName="${imgName}" imgPath="${imgPath}" onclick="showImage(this)"/>`
+        }
         liStyle = `background: none;padding: 0;`;
     }
     let sendTime = data.sendTime;
@@ -569,8 +573,11 @@ function showImage(obj) {	// 预览图片
             preImg.css('width', cwidth)
             preImg.css('height', (cwidth * imgH) / imgW)
         }
-
-        $('.img-preview .pre-img').attr('src', $(obj).attr('imgPath') + '75' + $(obj).attr('imgName'));
+        if ($(obj).attr('src').toString().toLowerCase().endsWith(".gif")) {
+            $('.img-preview .pre-img').attr('src', $(obj).attr('src'));
+        } else {
+            $('.img-preview .pre-img').attr('src', $(obj).attr('imgPath') + '75' + $(obj).attr('imgName'));
+        }
         $('.img-preview').show()
     })
 }
