@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +43,15 @@ public class UploadServiceImpl implements UploadService {
 
     @Autowired
     private ChatFileRepository chatFileRepository;
+    static BufferedImage waterMarkImg = null;
+    static {
+        try {
+            ClassPathResource image = new ClassPathResource("static/images/watermark.png");
+            waterMarkImg = ImageIO.read(image.getURL());
+        } catch (IOException e) {
+            log.error("读取水印图片异常！！！", e);
+        }
+    }
 
     @Override
     public String uploadImage(MultipartFile multipartFile) throws Exception {
@@ -87,8 +97,6 @@ public class UploadServiceImpl implements UploadService {
         chatFileRepository.insert(ChatFile.builder().fileName(multipartFile.getOriginalFilename()).size(multipartFile.getSize()).md5(md5).fileType(type).url(respPath).createTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT)).build());
 
         //压缩图片+水印
-        ClassPathResource image = new ClassPathResource("static/images/watermark.png");
-        BufferedImage waterMarkImg = ImageIO.read(image.getFile());
 
         String parentPath = fileConfig.getDirectoryMapping() + fileConfig.getUploadPath();
         Thumbnails.of(file).scale(0.25f).watermark(Positions.BOTTOM_CENTER, waterMarkImg, 0.5f).toFile(parentPath + "25/" + fileName);
