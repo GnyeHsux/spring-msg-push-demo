@@ -1,6 +1,9 @@
 package com.shiji.springdwrdemo.stomp.service;
 
+import com.shiji.springdwrdemo.stomp.domain.mo.ChatFile;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 上传文件
@@ -18,4 +21,10 @@ public interface UploadService {
      * @throws Exception
      */
     String uploadImage(MultipartFile multipartFile) throws Exception;
+
+    /**
+     * 获取上传的图片
+     * @return
+     */
+    List<ChatFile> getImages();
 }

@@ -12,14 +12,21 @@ import com.shiji.springdwrdemo.stomp.utils.DateUtils;
 import com.shiji.springdwrdemo.stomp.utils.Md5Utils;
 import com.shiji.springdwrdemo.stomp.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnailator;
+import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -43,6 +50,11 @@ public class UploadServiceImpl implements UploadService {
         }
 
         return execute(multipartFile);
+    }
+
+    @Override
+    public List<ChatFile> getImages() {
+        return chatFileRepository.findAll();
     }
 
     private String execute(MultipartFile multipartFile) throws Exception {
@@ -73,6 +85,15 @@ public class UploadServiceImpl implements UploadService {
         multipartFile.transferTo(file);
 
         chatFileRepository.insert(ChatFile.builder().fileName(multipartFile.getOriginalFilename()).size(multipartFile.getSize()).md5(md5).fileType(type).url(respPath).createTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT)).build());
+
+        //压缩图片+水印
+        ClassPathResource image = new ClassPathResource("static/images/watermark.png");
+        BufferedImage waterMarkImg = ImageIO.read(image.getFile());
+
+        String parentPath = fileConfig.getDirectoryMapping() + fileConfig.getUploadPath();
+        Thumbnails.of(file).scale(0.25f).watermark(Positions.BOTTOM_CENTER, waterMarkImg, 0.5f).toFile(parentPath + "25/" + fileName);
+        Thumbnails.of(file).scale(0.5f).watermark(Positions.BOTTOM_CENTER, waterMarkImg, 1f).toFile(parentPath + "50/" + fileName);
+        Thumbnails.of(file).scale(0.75f).watermark(Positions.BOTTOM_CENTER, waterMarkImg, 1f).toFile(parentPath + "75/" + fileName);
 
         return respPath;
     }

@@ -1,15 +1,15 @@
 package com.shiji.springdwrdemo.stomp.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.shiji.springdwrdemo.stomp.annotation.ChatRecord;
+import com.shiji.springdwrdemo.stomp.domain.mo.ChatFile;
 import com.shiji.springdwrdemo.stomp.domain.vo.ResponseVO;
 import com.shiji.springdwrdemo.stomp.service.UploadService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * 上传文件
@@ -36,6 +36,14 @@ public class UploadController {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("path", uploadService.uploadImage(multipartFile));
 
+        return new ResponseVO(jsonObject);
+    }
+
+    @GetMapping("/images")
+    public ResponseVO getImages() {
+        List<ChatFile> list = uploadService.getImages();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("list", list);
         return new ResponseVO(jsonObject);
     }
 }
