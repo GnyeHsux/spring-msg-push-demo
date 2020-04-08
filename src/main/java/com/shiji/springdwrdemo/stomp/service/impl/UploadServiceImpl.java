@@ -73,10 +73,6 @@ public class UploadServiceImpl implements UploadService {
     public Map<String, Object> getImages(int pageSize, int currentPage) {
         Map<String, Object> rstMap = new HashMap<>();
         Query query = Query.query(Criteria.where("type").is("image"));
-        // 设置起始数
-        query.skip((currentPage - 1) * pageSize)
-                // 设置查询条数
-                .limit(pageSize);
         // 查询记录总数
         int totalCount = (int) mongoTemplate.count(query, ChatFile.class);
         // 数据总页数
@@ -84,6 +80,10 @@ public class UploadServiceImpl implements UploadService {
         rstMap.put("totalCount", totalCount);
         rstMap.put("totalPage", totalPage);
 
+        // 设置起始数
+        query.skip((currentPage - 1) * pageSize)
+                // 设置查询条数
+                .limit(pageSize);
         query.with(Sort.by(Sort.Direction.DESC, "createTime"));
         // 查询当前页数据集合
         List<ChatFile> records = mongoTemplate.find(query, ChatFile.class);
