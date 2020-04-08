@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 上传文件
@@ -39,11 +40,9 @@ public class UploadController {
         return new ResponseVO(jsonObject);
     }
 
-    @GetMapping("/images")
-    public ResponseVO getImages() {
-        List<ChatFile> list = uploadService.getImages();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("list", list);
-        return new ResponseVO(jsonObject);
+    @RequestMapping("/images")
+    public ResponseVO getImages(@RequestParam(defaultValue = "1") int pageSize, @RequestParam(defaultValue = "10") int currentPage) {
+        Map<String, Object> rstMap = uploadService.getImages(pageSize, currentPage);
+        return new ResponseVO(rstMap);
     }
 }

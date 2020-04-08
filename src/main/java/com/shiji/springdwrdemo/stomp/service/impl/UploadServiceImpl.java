@@ -3,6 +3,7 @@ package com.shiji.springdwrdemo.stomp.service.impl;
 import com.shiji.springdwrdemo.dao.ChatFileRepository;
 import com.shiji.springdwrdemo.stomp.config.FileConfig;
 import com.shiji.springdwrdemo.stomp.constant.DateConstant;
+import com.shiji.springdwrdemo.stomp.constant.FileConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.ChatFile;
 import com.shiji.springdwrdemo.stomp.enums.CodeEnum;
 import com.shiji.springdwrdemo.stomp.exception.ErrorCodeException;
@@ -12,13 +13,16 @@ import com.shiji.springdwrdemo.stomp.utils.DateUtils;
 import com.shiji.springdwrdemo.stomp.utils.Md5Utils;
 import com.shiji.springdwrdemo.stomp.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
-import net.coobird.thumbnailator.Thumbnailator;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,8 +31,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author yanpanyi
@@ -43,6 +46,10 @@ public class UploadServiceImpl implements UploadService {
 
     @Autowired
     private ChatFileRepository chatFileRepository;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     static BufferedImage waterMarkImg = null;
     static {
         try {
@@ -63,8 +70,26 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public List<ChatFile> getImages() {
-        return chatFileRepository.findAll();
+    public Map<String, Object> getImages(int pageSize, int currentPage) {
+        Map<String, Object> rstMap = new HashMap<>();
+        Query query = Query.query(Criteria.where("type").is("image"));
+        // 设置起始数
+        query.skip((currentPage - 1) * pageSize)
+                // 设置查询条数
+                .limit(pageSize);
+        // 查询记录总数
+        int totalCount = (int) mongoTemplate.count(query, ChatFile.class);
+        // 数据总页数
+        int totalPage = totalCount % pageSize == 0 ? totalCount / pageSize : totalCount / pageSize + 1;
+        rstMap.put("totalCount", totalCount);
+        rstMap.put("totalPage", totalPage);
+
+        query.with(Sort.by(Sort.Direction.DESC, "createTime"));
+        // 查询当前页数据集合
+        List<ChatFile> records = mongoTemplate.find(query, ChatFile.class);
+        rstMap.put("list", records);
+
+        return rstMap;
     }
 
     private String execute(MultipartFile multipartFile) throws Exception {
@@ -94,7 +119,7 @@ public class UploadServiceImpl implements UploadService {
 
         multipartFile.transferTo(file);
 
-        chatFileRepository.insert(ChatFile.builder().fileName(multipartFile.getOriginalFilename()).size(multipartFile.getSize()).md5(md5).fileType(type).url(respPath).createTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT)).build());
+        chatFileRepository.insert(ChatFile.builder().fileName(multipartFile.getOriginalFilename()).size(multipartFile.getSize()).md5(md5).fileType(type).url(respPath).createTime(DateUtils.getDate(DateConstant.SEND_TIME_FORMAT)).type(FileConstant.TYPE.IMAGE).build());
 
         //压缩图片+水印
 

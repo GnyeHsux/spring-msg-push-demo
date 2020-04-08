@@ -17,6 +17,8 @@ public class ChatFile implements Serializable {
 
     private String fileName;
 
+    private String type;
+
     private String fileType;
 
     private String md5;

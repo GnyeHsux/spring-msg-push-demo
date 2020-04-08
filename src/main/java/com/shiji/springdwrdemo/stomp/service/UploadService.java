@@ -1,9 +1,8 @@
 package com.shiji.springdwrdemo.stomp.service;
 
-import com.shiji.springdwrdemo.stomp.domain.mo.ChatFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * 上传文件
@@ -26,5 +25,5 @@ public interface UploadService {
      * 获取上传的图片
      * @return
      */
-    List<ChatFile> getImages();
+    Map<String, Object> getImages(int pageSize, int currentPage);
 }
