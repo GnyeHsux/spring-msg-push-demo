@@ -33,7 +33,7 @@ public class StaticScheduleTask {
     //直接指定时间间隔，例如：5秒
     //@Scheduled(fixedRate=5000)
     //添加定时任务
-    @Scheduled(cron = "0 17 14 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     private void configureTasks() {
         log.info("执行清除已接收离线消息定时任务时间: {}", LocalDateTime.now());
 
