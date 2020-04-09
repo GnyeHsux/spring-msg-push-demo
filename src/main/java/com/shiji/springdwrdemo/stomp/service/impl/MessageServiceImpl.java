@@ -1,10 +1,9 @@
 package com.shiji.springdwrdemo.stomp.service.impl;
 
-import com.shiji.springdwrdemo.dao.OfflineMessageRepository;
-import com.shiji.springdwrdemo.dao.UserRepository;
+import com.shiji.springdwrdemo.stomp.dao.OfflineMessageRepository;
+import com.shiji.springdwrdemo.stomp.dao.UserRepository;
 import com.shiji.springdwrdemo.stomp.annotation.ChatRecord;
 import com.shiji.springdwrdemo.stomp.cache.UserCache;
-import com.shiji.springdwrdemo.stomp.constant.MessageConstant;
 import com.shiji.springdwrdemo.stomp.constant.RobotConstant;
 import com.shiji.springdwrdemo.stomp.constant.StompConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.OfflineMessage;

@@ -1,4 +1,4 @@
-package com.shiji.springdwrdemo.dao;
+package com.shiji.springdwrdemo.stomp.dao;
 
 import com.shiji.springdwrdemo.stomp.domain.mo.ChatFile;
 import org.springframework.data.mongodb.repository.MongoRepository;

@@ -1,8 +1,8 @@
 package com.shiji.springdwrdemo.stomp.listener;
 
-import com.shiji.springdwrdemo.dao.MessageRecordRepository;
-import com.shiji.springdwrdemo.dao.OfflineMessageRepository;
-import com.shiji.springdwrdemo.dao.UserRepository;
+import com.shiji.springdwrdemo.stomp.dao.MessageRecordRepository;
+import com.shiji.springdwrdemo.stomp.dao.OfflineMessageRepository;
+import com.shiji.springdwrdemo.stomp.dao.UserRepository;
 import com.shiji.springdwrdemo.stomp.cache.UserCache;
 import com.shiji.springdwrdemo.stomp.constant.DateConstant;
 import com.shiji.springdwrdemo.stomp.constant.MessageConstant;
@@ -63,7 +63,9 @@ public class WebSocketListener {
     @EventListener
     public void handleDisconnectListener(SessionDisconnectEvent sessionDisconnectEvent) throws Exception {
         log.debug("断开连接 -> {}", sessionDisconnectEvent);
-
+        if (sessionDisconnectEvent.getUser() == null) {
+            return;
+        }
         String userId = sessionDisconnectEvent.getUser().getName();
         User user = UserCache.getUser(userId);
         if (null == user) {

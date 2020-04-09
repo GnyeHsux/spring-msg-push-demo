@@ -1,6 +1,6 @@
 package com.shiji.springdwrdemo.stomp.aop;
 
-import com.shiji.springdwrdemo.dao.MessageRecordRepository;
+import com.shiji.springdwrdemo.stomp.dao.MessageRecordRepository;
 import com.shiji.springdwrdemo.stomp.domain.dto.ChatRecordDTO;
 import com.shiji.springdwrdemo.stomp.domain.mo.MessageRecord;
 import com.shiji.springdwrdemo.stomp.domain.vo.MessageVO;

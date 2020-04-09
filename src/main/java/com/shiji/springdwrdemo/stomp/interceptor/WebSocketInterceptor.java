@@ -1,7 +1,7 @@
 package com.shiji.springdwrdemo.stomp.interceptor;
 
-import com.shiji.springdwrdemo.dao.UserLoginInfoRepository;
-import com.shiji.springdwrdemo.dao.UserRepository;
+import com.shiji.springdwrdemo.stomp.dao.UserLoginInfoRepository;
+import com.shiji.springdwrdemo.stomp.dao.UserRepository;
 import com.shiji.springdwrdemo.stomp.constant.DateConstant;
 import com.shiji.springdwrdemo.stomp.constant.UserStatusConstant;
 import com.shiji.springdwrdemo.stomp.domain.mo.User;

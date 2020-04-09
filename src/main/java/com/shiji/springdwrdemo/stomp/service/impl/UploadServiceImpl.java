@@ -1,6 +1,6 @@
 package com.shiji.springdwrdemo.stomp.service.impl;
 
-import com.shiji.springdwrdemo.dao.ChatFileRepository;
+import com.shiji.springdwrdemo.stomp.dao.ChatFileRepository;
 import com.shiji.springdwrdemo.stomp.config.FileConfig;
 import com.shiji.springdwrdemo.stomp.constant.DateConstant;
 import com.shiji.springdwrdemo.stomp.constant.FileConstant;
