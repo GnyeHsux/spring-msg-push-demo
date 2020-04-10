@@ -48,7 +48,7 @@ let stompClient = null;
 let onlineUserList = [];
 
 function connect() {
-    let socket = new SockJS('http://aliyun.whycode.icu:8081/stomp-websocket');
+    let socket = new SockJS('/stomp-websocket');
     stompClient = Stomp.over(socket);
 
     // 每隔30秒做一次心跳检测
